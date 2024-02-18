@@ -1,8 +1,278 @@
 html, body {
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 canvas {
   display: block;
+}
+
+.container {
+  /* width: 100vw;
+  height: 100vh;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center; */
+}
+
+button {
+  /* background: none; */
+  /* border: 2px solid;
+  font: inherit;
+  line-height: 1;
+  margin: 0.5em;
+  padding: 1em 2em; */
+}
+
+button {  
+  color: var(--color);
+  transition: 0.25s;
+}
+
+button:hover,
+button:focus { 
+  border-color: var(--hover);
+  color: #fff;
+}
+
+
+h2 {
+  margin-bottom: 30px;
+}
+
+h3 {
+  margin-top: 0;
+}
+
+a {
+  cursor: pointer;
+  color: #222326;
+  border-bottom: solid 1px #222326;
+}
+
+a:hover {
+  color: #fff;
+  border-bottom: solid 1px #fff;
+}
+
+ol {
+  list-style-position: inside;
+  width: 100%;
+  padding: 0;
+}
+
+ul {
+  padding: 0 30px;
+}
+
+li {
+  cursor: pointer;
+  padding: 20px 30px;
+  width: 100%;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.all {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+}
+
+.control-panels {
+  display: flex;
+  width: 650px;
+  background-color: #FAE62D;
+  height: 100%;
+}
+
+.active-step-panel {
+  padding: 30px;
+  width: 350px;
+  position: relative;
+  overflow: scroll;
+}
+
+.image-preview {
+  height: 100vh;
+  width: calc(100vw - 650px);
+  overflow: scroll;
+}
+
+.nav-panel {
+  width: 300px;
+  background-color: #F037A5;
+  overflow: scroll;
+  height: 100%;
+}
+
+.side-bar-text {
+  padding: 20px;
+}
+
+.selected-step {
+  background-color: #FAE62D;
+}
+
+.non-selected-step {
+  background-color: #F037A5;
+}
+
+.non-selected-step:hover {
+  color: white;
+}
+
+.credits-placer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 300px;
+  margin: 0;
+}
+
+.credits {
+  list-style: none;
+  font-weight: normal;
+  font-size: 14px;
+  padding-left: 30px;
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  border: 2px solid #F037A5;
+  color: #F037A5;
+  border-radius: 500px;
+  display: inline-block;
+  padding: 10px 29px;
+  cursor: pointer;
+  font-size: 12px;
+  text-transform: uppercase;
+  height: 35px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 2px;
+}
+
+.custom-file-upload:hover {
+  background-color: #F037A5;
+  color: #FAE62D;
+}
+
+.smaller-paste {
+  font-size: 12px;
+  margin-top: 0px;
+  padding-left: 5px;
+}
+
+#svg-holder {
+  fill: none;
+  stroke: black;
+  stroke-width: 2px;
+  width: 100px;
+  height: 100px;
+  position: absolute;
+  top: 60px;
+  right: 30px;
+}
+
+#svg-holder > svg {
+  width: 100px;
+  height: 100px;
+}
+
+.nestpas {
+  font-family: 'Pacifico', cursive;
+  font-size: 14px;
+  position: absolute;
+  top: 130px;
+  right: 16px;
+  width: 109px;
+  color: #EB1E32;
+  line-height: 1;
+}
+
+.CodeMirror {
+  height: 300px;
+}
+
+.cm-input {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.svg-text-error {
+  width: calc(100% - 30px);
+  left: 30px;
+  padding-left: 20px;
+  height: 60px;
+  background-color: #F037A5;
+  position: absolute;
+  bottom: 0;
+  z-index: 10;
+  border: 2px solid #FAE62D;
+  font-size: 14px;
+  color: white;
+}
+
+.example-container {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.dot-button > svg {
+  fill: none;
+  stroke: #F037A5;
+  stroke-width: 2px;
+  width: 32px;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.dot-button {
+  background-color: transparent;
+  width: 66px;
+  height: 66px;
+  border-radius: 66px;
+  border: #F037A5 2px solid;
+  font-size: 14px;
+  color: #F037A5;
+  margin-bottom: 20px;
+}
+
+.dot-button:hover {
+  background-color: #F037A5;
+  color: #FAE62D;
+}
+
+.selected-dot-button {
+  background-color: #F037A5;
+  color: #FAE62D;
+}
+
+.selected-dot-button > svg {
+  fill: none;
+  stroke: #FAE62D;
+  stroke-width: 2px;
+  width: 32px;
+  margin: 0;
+}
+
+.dot-button:hover > svg {
+  fill: none;
+  stroke: #FAE62D;
+  stroke-width: 2px;
+  width: 32px;
+  margin: 0;
+}
+
+.icon {
+  width: 16px;
+  display: inline-block;
 }
