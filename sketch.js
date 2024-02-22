@@ -3,6 +3,8 @@ const sketch = {
   p5: null,
   svg: {
     el: null,
+    original: null,
+    pathologize: null,
     get sizeOf() {
       return this.el.getBoundingClientRect() ?? null
     }
@@ -19,12 +21,13 @@ const sketch = {
     id: `fourier-art-${Math.floor(Math.random() * 10 + (10 - 1))}`,
     width: window.screen.width,
     height: window.screen.height,
-    transform: {
-      x: 0,
-      y: 0
-    }
   },
-  waveCount: 1000,
+  waveCount: 5000,
+  scale: 1,
+  transform: {
+    x: 0,
+    y: 0
+  },
   images: [],
   currentIndex: 0,
   pathCoordinates: [],
@@ -53,29 +56,37 @@ const sketch = {
     }
   },
 
-  set coordinates(coordinate) {
-    const svgContainer = document.querySelector('#svg-content')
+  set coordinates({coordinate, newSvg}) {
+    try {
+      const svgContainer = document.querySelector('#svg-content')
 
-    svgContainer.innerHTML = pathologize(coordinate)
-    this.svg.el = document.querySelector('#svg-content > svg')
-    const paths = document.querySelectorAll('path')
+      this.svg.original = coordinate
+      this.svg.pathologize = pathologize(coordinate)
+  
+      svgContainer.innerHTML = this.svg.pathologize
+      this.svg.el = document.querySelector('#svg-content > svg')
+      const paths = document.querySelectorAll('path')
+  
+      if(this.seperate)
+        this.pathCoordinates = pathsToCoords(paths, this.scale, this.waveCount, this.transform.x, this.seperate)
+      else
+        this.pathCoordinates[0] = pathsToCoords(paths, this.scale, this.waveCount, this.transform.y, this.seperate)
+  
+      if(this.p5 && newSvg) {
+        this.p5.clear()
+        this.p5.remove()
+        this.finished = false
+        this.path = []
+        this.time = 0
+      } else if(this.p5) {
+        coordinate()
+      } else {
+        new p5(this.drawMachine, 'canvasHolder')
+      }
+  
+    } catch {
 
-    document.getElementById('coord-content').innerHTML = coordinate
-
-    if(this.seperate)
-      this.pathCoordinates = pathsToCoords(paths, 1, this.waveCount, 0, 0, this.seperate)
-    else
-      this.pathCoordinates[0] = pathsToCoords(paths, 1, this.waveCount, 0, 0, this.seperate)
-
-    if(this.p5) {
-      this.p5.clear()
-      this.p5.remove()
-      this.finished = false
-      this.path = []
-      this.time = 0
     }
-
-    new p5(this.drawMachine, 'canvasHolder')
   },
 
   set index(index) {
@@ -112,12 +123,10 @@ const sketch = {
         p5.createCanvas(this.canvas.width, this.canvas.height);
 
         coordinate()
-        alert(1)
         // currentImage = this.p5.createGraphics(this.canvas.width, this.canvas.height)
       }
     
       p5.draw =  () => {
-        p5.background(0)
         this.fourier()
 
         const dt = p5.TWO_PI / this.fourierX.length;
@@ -188,27 +197,6 @@ const sketch = {
       }
     }
     return p5.createVector(x, y);
-  },
-
-
-  tryYourSvg(file) {
-    try {
-      const reader = new FileReader()
-      reader.onload = e => {
-        if (e.target.result) {
-          this.coordinates = e.target.result
-        } else throw new Error("File content is empty or isn't readable")
-      }
-
-      reader.onerror = e => {
-        throw new Error(e)
-      }
-
-      reader.readAsText(file.files[0])
-
-    } catch (e) {
-      console.error(e)
-    }
   },
 
 }
