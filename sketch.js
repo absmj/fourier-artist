@@ -28,7 +28,7 @@ let sketch = {
     }
   },
 
-  coordinates({coordinate, newSvg}) {
+  coordinates(coordinate) {
     try {
       index = 0;
       this.data.finished = false
@@ -39,8 +39,10 @@ let sketch = {
       this.data.svg.original = coordinate
       this.data.svg.pathologize = pathologize(coordinate)
   
-      svgContainer.innerHTML = this.data.svg.pathologize
+      svgContainer.innerHTML = coordinate
       this.data.svg.el = document.querySelector('#svg-content > svg')
+      this.data.svg.el.setAttribute('width', '200')
+      this.data.svg.el.setAttribute('height', '200')
       const paths = document.querySelectorAll('path')
 
       if(this.data.seperate)
@@ -48,6 +50,7 @@ let sketch = {
       else
         this.data.pathCoordinates[0] = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
 
+      return this;
     } catch(e) {
       console.error(e)
     }
@@ -121,14 +124,18 @@ let sketch = {
     
       p5.draw =  () => {
         this.data.p5.background(this.data.options.background)
-        p5.coordinateSystem()
+        if(this.data.options.show.axis) p5.coordinateSystem();
         const {x, y} = this.fourier()
-        p5.textSize(18)
-        p5.textAlign(p5.RIGHT);
-        p5.text(`x: ${x.toFixed(2)}\ny: ${y.toFixed(2)}`, this.data.canvas.width - 20, 20)
+        if(this.data.options.show.coordinate) {
+          p5.textSize(18)
+          p5.textAlign(p5.RIGHT);
+          p5.text(`x: ${x.toFixed(2)}\ny: ${y.toFixed(2)}`, this.data.canvas.width - 20, 36)
+        }
+
         p5.translate(this.data.transform.x, this.data.transform.y)
         p5.scale(this.data.scale)
-        this.data.p5.grid()
+
+        if(this.data.options.show.grid) p5.grid();
         
         const dt = p5.TWO_PI / this.data.fourierX.length;
         this.data.time += dt;

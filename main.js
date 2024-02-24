@@ -30,6 +30,11 @@ const sketchData = {
     options: {
       background: 255,
       color: 0,
+      show: {
+        axis: true,
+        coordinate: true,
+        grid: true
+      },
       dots: {
         radius: 1,
         active: true,

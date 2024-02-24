@@ -51,36 +51,41 @@
           <h2>Import SVG</h2>
           <hr>
           <div v-show="svg">
-            <div class="img-fluid" id="svg-content"></div>
+            <div class="d-flex justify-content-center align-items-center" id="svg-content"></div>
             <hr>
           </div>
           <label for="file-upload" class="custom-file-upload">
             Select File
           </label>
+          
           <input id="file-upload" type="file" @change="handleFile" />
-          <p class='smaller-paste'>or paste SVG text file below</p>
-          <div :style='{stroke: error ? "#EB1E32" : "#F037A5"}' ref="svgHolder" id='svg-holder'>
-          </div>
+          <div :style='{stroke: error ? "#EB1E32" : "#F037A5"}' ref="svgHolder" id='svg-holder'></div>
 
 
           <p v-if="error" class='nestpas'>Error: Ceci n'est pas une SVG</p>
 
-          <div class='cm-input' ref="code-mirror-input">
+          <div v-if="svgTextError" class='cm-input' ref="code-mirror-input">
 
-            <div v-if="svgTextError" class='svg-text-error'>
+            <div class='svg-text-error'>
               <p>{{svgTextError}}</p>
             </div>
           </div>
-          <h3>...or try an example</h3>
-          <textarea id="coord-content" v-model="svg" class="form-control" rows="10">{{svg}}</textarea>
 
+          <hr>
+          <div class="form-floating">
+            <textarea id="coord-content" v-model="svg" class="form-control" style="height: 200px">{{svg}}</textarea>
+            <label for="floatingTextarea2">or paste SVG text file below</label>
+          </div>
+          <hr>
+          <h3>...or try an example</h3>
           <div class='example-container'>
             <!-- {{#each Object.keys(examples) as example }}
             <button on:click='setNewSVG(examples[example], true, example)' class='dot-button {{selectedExample === example ? "selected-dot-button" : ""}}'>{{{examples[example]}}}</button>
              {{/each}} -->
           </div>
-          <p>Find more SVGs at the <a target='_blank' href="https://thenounproject.com">Noun Project<img class='icon'
-                alt='link out' src='../src/static/images/link-out.svg' /></a></p>
+          <hr>
+          <p>Find more SVGs at the <a data-bs-toggle="modal" data-bs-target="#api-modal">Noun Project</a> 
+            or <a data-bs-toggle="modal" data-bs-target="#api-modal">Wikimedia Commons</a></p>
         </div>
 
         <div class='step-2' :class="step==2?'d-block':'d-none'">
@@ -108,14 +113,15 @@
               </div>
             </div>
             <hr>
-    
+
             <div class="row">
               <label class="col-8 col-form-label" for="">TranslateX:</label>
               <div class="col-4">
                 <input class='form-control' type='text' v-model.number='svgInstance.transform.x' />
               </div>
               <div class="col-12">
-                <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width' step="1" v-model.number='svgInstance.transform.x' />
+                <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width' step="1"
+                  v-model.number='svgInstance.transform.x' />
               </div>
             </div>
             <hr>
@@ -126,15 +132,30 @@
                 <input class='form-control' type='text' v-model.number='svgInstance.transform.y' />
               </div>
               <div class="col-12">
-                <input class="form-range" type='range' min='1' :max='svgInstance.canvas.height' step="1" v-model.number='svgInstance.transform.y' />
+                <input class="form-range" type='range' min='1' :max='svgInstance.canvas.height' step="1"
+                  v-model.number='svgInstance.transform.y' />
               </div>
             </div>
             <hr>
 
             <div class="row">
-              <div class="form-check">
-                <input class='form-check-input' type="checkbox" v-model='svgInstance.seperate' />
-                <label class="form-check-label" for="">Seperate</label>
+              <div class="col-12">
+                <div class="form-check">
+                  <input class='form-check-input' type="checkbox" v-model='svgInstance.seperate' />
+                  <label class="form-check-label" for="">Seperate</label>
+                </div>
+                <div class="form-check">
+                  <input class='form-check-input' type="checkbox" v-model='svgInstance.options.show.grid' />
+                  <label class="form-check-label" for="">Grid</label>
+                </div>
+                <div class="form-check">
+                  <input class='form-check-input' type="checkbox" v-model='svgInstance.options.show.axis' />
+                  <label class="form-check-label" for="">Coordinate axis</label>
+                </div>
+                <div class="form-check">
+                  <input class='form-check-input' type="checkbox" v-model='svgInstance.options.show.coordinate' />
+                  <label class="form-check-label" for="">Show coordinates</label>
+                </div>
               </div>
             </div>
             <hr>
@@ -146,7 +167,8 @@
                   Line
                 </label>
                 <div class="form-check form-switch justify-content-between m-0 ms-2">
-                  <input class="form-check-input" type="checkbox" role="switch" v-model="svgInstance.options.dots.active" id="flexCheckDefault">
+                  <input class="form-check-input" type="checkbox" role="switch"
+                    v-model="svgInstance.options.dots.active" id="flexCheckDefault">
                 </div>
                 <label class="form-check-label" for="flexCheckDefault">
                   Dots
@@ -154,14 +176,15 @@
               </div>
             </div>
             <hr>
-            
+
             <div v-if="svgInstance.options.dots.active" class="row">
               <label class="col-8 col-form-label" for="">Dot radius:</label>
               <div class="col-4">
                 <input class='form-control' type='text' v-model='svgInstance.options.dots.radius' />
               </div>
               <div class="col-12">
-                <input class="form-range" type='range' min='1' max='25' step="1" v-model='svgInstance.options.dots.radius' />
+                <input class="form-range" type='range' min='1' max='25' step="1"
+                  v-model='svgInstance.options.dots.radius' />
               </div>
             </div>
 
@@ -171,43 +194,76 @@
                 <input class='color-picker' type="color" @change='svgInstance.options.color = $event.target.value' />
               </div>
               <div class="col-12">
-                <a @click='svgInstance.options.color="random"'>
-                  <span :style="{color:confetti()}">C</span>
-                  <span :style="{color:confetti()}">o</span>
-                  <span :style="{color:confetti()}">n</span>
-                  <span :style="{color:confetti()}">f</span>
-                  <span :style="{color:confetti()}">e</span>
-                  <span :style="{color:confetti()}">t</span>
-                  <span :style="{color:confetti()}">t</span>
-                  <span :style="{color:confetti()}">i</span>
-                  <span :style="{color:confetti()}">!</span>
-                </a>
+                <div class="d-grid gap-2">
+                  <a @click='svgInstance.options.color="random"' class="btn btn-primary fw-bold">
+                    <span :style="{color:confetti}">C</span>
+                    <span :style="{color:confetti}">o</span>
+                    <span :style="{color:confetti}">n</span>
+                    <span :style="{color:confetti}">f</span>
+                    <span :style="{color:confetti}">e</span>
+                    <span :style="{color:confetti}">t</span>
+                    <span :style="{color:confetti}">t</span>
+                    <span :style="{color:confetti}">i</span>
+                    <span :style="{color:confetti}">!</span>
+                  </a>
+                </div>
               </div>
             </div>
-            <hr>
-
-
 
           </fieldset>
 
-          <div class="btn-group btn-group-sm" role="group" aria-label="...">
-            <button on:click='set({coordType: "outline"})' type="button" class="btn btn-stroked-dark data-format-but {{coordType === 'outline' ? 'dark-selected' : 'non-selected'}}">Outline</button>
-            <!-- <button type="button" class="btn btn-stroked-dark">Middle</button> -->
-            <button on:click='set({coordType: "inside"})' type="button" class="btn btn-stroked-dark data-format-but {{coordType === 'inside' ? 'dark-selected' : 'non-selected'}}">Fill</button>
-          </div>
-          
-          <p class='small'>Note: Fill mode works best with very simple SVGs.</p>
         </div>
       </div>
     </div>
     <div id='canvasHolder' class='image-preview d-flex align-items-center justify-content-center'></div>
+
+    <div id="api-modal" class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Modal title</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-2">
+              <div class="col-10">
+                <input type="search" id="query" name="query" v-model="api.query" class="form-control" aria-describedby="passwordHelpBlock">
+              </div>
+              <div class="col-2">
+                <div class="d-grid gap-2">
+                  <button @click="searchFromApi()" class="btn btn-primary">Search</button>
+                </div>
+              </div>
+            </div>
+            <hr>
+            <div v-if="api.samples.length > 0" class="row g-3 justify-content-center">
+              <div v-for="sample in api.samples" :key="sample.id" class="col-auto">
+                <div class="card" style="width: 12rem;">
+                  <img :src="sample.thumbnail_url" class="card-img-top" :alt="sample.attribution">
+                  <div class="card-body">
+                    <h5 class="card-title">{{sample.attribution}}</h5>
+                    <p class="card-text">{{sample.creator.name}}</p>
+                    <div class="d-grid gap-2">
+                      <a href="#" class="btn btn-primary">Select</a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </body>
 <script src="main.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-  crossorigin="anonymous"></script>
+  integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 <script src="helpers/pathologist.js"></script>
 <script src="libraries/p5.min.js"></script>
 <script src="libraries/p5.sound.min.js"></script>
@@ -223,6 +279,12 @@
 
   const app = createApp({
     setup() {
+      const api = ref({
+        name: 'noun',
+        query: 'happy',
+        samples: [],
+        loading: false
+      })
       const step = ref(1)
       const svg = ref(null)
       const coordinates = ref([])
@@ -230,29 +292,30 @@
       const svgTextError = ref(null)
       const svgInstance = ref(sketchData)
 
-      return { step, svg, coordinates, error, svgTextError, svgInstance }
+      return { step, svg, coordinates, error, svgTextError, svgInstance, api }
     },
-    mounted() {
-
+    
+    computed: {
+      confetti() {
+        return `rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`;
+      }
     },
 
     watch: {
       svg(newVal, oldValue) {
-        sketch.coordinates({ coordinate: newVal, newSvg: true })
-        sketch.mount()
+        sketch.coordinates(newVal).mount()
       },
 
       svgInstance: {
         handler(val) {
-          sketch.coordinates({coordinate: this.svg, newSvg: false})
-          sketch.mount()
+          sketch.coordinates(this.svg).mount()
         },
         deep: true
       },
     },
 
     methods: {
-      async handleFile(e) {
+      handleFile(e) {
         try {
           const reader = new FileReader()
           reader.onload = e => {
@@ -272,8 +335,25 @@
         }
       },
 
-      confetti() {
-        return `rgb(${Math.round(Math.random()*255)}, ${Math.round(Math.random()*255)}, ${Math.round(Math.random()*255)})`;
+      async searchFromApi(more = false) {
+        try {
+          this.api.loading = true
+          const request = await fetch('http://localhost/index.php', {
+            method: 'POST',
+            body: JSON.stringify({query: this.api.query})
+          })
+
+          const response = await request.json()
+          if(more)
+            this.api.samples.push(...response.icons)
+          else
+            this.api.samples.splice(0, 1, ...response.icons)
+
+        } catch(e) {
+
+        } finally {
+          this.api.loading = false
+        }
       }
     },
   })
