@@ -1,156 +1,156 @@
 
-const sketch = {
-  p5: null,
-  svg: {
-    el: null,
-    original: null,
-    pathologize: null,
-    get sizeOf() {
-      return this.el.getBoundingClientRect() ?? null
+let index = 0;
+let sketch = {
+  data: sketchData,
+
+  get color() {
+    return this.data.options.color == 'random' ? 
+       this.data.p5.color(`rgb(${Math.round(Math.random()*255)}, ${Math.round(Math.random()*255)}, ${Math.round(Math.random()*255)})`)
+      : this.data.p5.color(this.data.options.color)
+  },
+
+  mount() {
+    if(this.data.p5) {
+      index = 0;
+      this.data.path = []
+      this.data.time = 0
+      this.data.p5.coordinate()
+      this.data.p5.clear()
+
+      this.data.p5.loop()
+
+      // this.data.p5.redraw()
+
+
+      // new this.data.p5(this.drawMachine, 'canvasHolder')
+    } else {
+      new p5(this.drawMachine, 'canvasHolder')
     }
   },
 
-  get optimize() {
-    const rs = this.canvas.width / this.canvas.height
-    const ri = this.svg.sizeOf.width / this.svg.sizeOf.height
-    return rs > ri ? [(this.svg.sizeOf.width * this.canvas.height/this.svg.sizeOf.height), this.canvas.height] :
-                      [this.canvas.width, (this.svg.sizeOf.height * this.canvas.width/this.svg.sizeOf.width)]        
-  },
-
-  canvas: {
-    id: `fourier-art-${Math.floor(Math.random() * 10 + (10 - 1))}`,
-    width: window.screen.width,
-    height: window.screen.height,
-  },
-  waveCount: 5000,
-  scale: 1,
-  transform: {
-    x: 0,
-    y: 0
-  },
-  images: [],
-  currentIndex: 0,
-  pathCoordinates: [],
-  x: [],
-  fourierX: [],
-  path: [],
-  time: 0,
-  finished: false,
-  seperate: false,
-  record: false,
-  options: {
-    background: 255,
-    dots: {
-      active: true,
-      scale: 1,
-      color: 0,
-      opacity: 100
-    },
-    lineStroke: {
-      opacity: 20,
-      color: 0
-    },
-    ellipseStroke: {
-      opacity: 20,
-      color: 0
-    }
-  },
-
-  set coordinates({coordinate, newSvg}) {
+  coordinates({coordinate, newSvg}) {
     try {
+      index = 0;
+      this.data.finished = false
+  
+      this.data.pathCoordinates = new Array()
       const svgContainer = document.querySelector('#svg-content')
 
-      this.svg.original = coordinate
-      this.svg.pathologize = pathologize(coordinate)
+      this.data.svg.original = coordinate
+      this.data.svg.pathologize = pathologize(coordinate)
   
-      svgContainer.innerHTML = this.svg.pathologize
-      this.svg.el = document.querySelector('#svg-content > svg')
+      svgContainer.innerHTML = this.data.svg.pathologize
+      this.data.svg.el = document.querySelector('#svg-content > svg')
       const paths = document.querySelectorAll('path')
-  
-      if(this.seperate)
-        this.pathCoordinates = pathsToCoords(paths, this.scale, this.waveCount, this.transform.x, this.seperate)
-      else
-        this.pathCoordinates[0] = pathsToCoords(paths, this.scale, this.waveCount, this.transform.y, this.seperate)
-  
-      if(this.p5 && newSvg) {
-        this.p5.clear()
-        this.p5.remove()
-        this.finished = false
-        this.path = []
-        this.time = 0
-      } else if(this.p5) {
-        coordinate()
-      } else {
-        new p5(this.drawMachine, 'canvasHolder')
-      }
-  
-    } catch {
 
+      if(this.data.seperate)
+        this.data.pathCoordinates = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
+      else
+        this.data.pathCoordinates[0] = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
+
+    } catch(e) {
+      console.error(e)
     }
   },
 
   set index(index) {
-    this.currentIndex = index;
+    this.data.currentIndex = index;
   },
   
   get drawMachine() {
     return p5 => {
-      let index = 0;
-      const coordinate = () => {
-        const skip = 1;
-        this.x = [];
-        for (let i = 0; i < this.pathCoordinates[index].length; i += skip) {
-          const c = new Complex(this.pathCoordinates[index][i][0], this.pathCoordinates[index][i][1]);
-          this.x.push(c);
-          
-        }
-        // currentImage = this.images[index]
 
-        this.fourierX = dft(this.x, this.p5);
-        this.fourierX.sort((a, b) => b.amp - a.amp);
+      p5.coordinate = () => {
+        const skip = 1;
+        this.data.x = [];
+        for (let i = 0; i < this.data.pathCoordinates[index].length; i += skip) {
+          const coord = this.data.pathCoordinates[index][i]
+          const c = new Complex(coord[0], coord[1]);
+          c.color = this.color
+          this.data.x.push(c);
+        }
+        // currentImage = this.data.images[index]
+
+        this.data.fourierX = dft(this.data.x, this.data.p5).map(v => ({...v, color: this.color}));
+        this.data.fourierX.sort((a, b) => b.amp - a.amp);
 
    
       }
 
+      p5.grid = () => {
+        p5.push();
+        p5.drawingContext.setLineDash([5,5])
+        for(let w = 0; w < this.data.canvas.width; w+=this.data.canvas.width/10) {
+          for(let h = 0; h < this.data.canvas.height; h+=this.data.canvas.height/10) {
+            p5.stroke(0, 20);
+            p5.strokeWeight(1);
+            p5.line(w, 0, w, this.data.canvas.height);
+            p5.line(0, h, this.data.canvas.width, h);
+          }
+        }
+        p5.pop();
+      }
+
+      p5.coordinateSystem = () => {
+        p5.push()
+        p5.fill(0)
+        
+        // p5.line(0, 0, 0, this.data.canvas.height)
+        p5.line(20, 0, 20, this.data.canvas.height)
+        p5.line(0, this.data.canvas.height - 20, this.data.canvas.width, this.data.canvas.height - 20)
+        p5.triangle(20,10,15,20,25,20)
+        p5.triangle(this.data.canvas.width - 10,this.data.canvas.height - 20,this.data.canvas.width - 20,this.data.canvas.height - 15,this.data.canvas.width - 20,this.data.canvas.height - 25)
+
+        p5.pop()
+      }
+
       p5.preload = () => {
-        this.p5 = p5
+        this.data.p5 = p5
       }
     
       p5.setup = () => {
         const canvasEl = document.getElementById("canvasHolder")
-        this.canvas.width = canvasEl.offsetWidth
-        this.canvas.height = canvasEl.offsetHeight
-        p5.createCanvas(this.canvas.width, this.canvas.height);
+        this.data.canvas.width = canvasEl.offsetWidth
+        this.data.canvas.height = canvasEl.offsetHeight
+        p5.createCanvas(this.data.canvas.width, this.data.canvas.height);
 
-        coordinate()
-        // currentImage = this.p5.createGraphics(this.canvas.width, this.canvas.height)
+        p5.coordinate()
+
+        // currentImage = this.data.p5.createGraphics(this.data.canvas.width, this.data.canvas.height)
       }
     
       p5.draw =  () => {
-        this.fourier()
-
-        const dt = p5.TWO_PI / this.fourierX.length;
-        this.time += dt;
+        this.data.p5.background(this.data.options.background)
+        p5.coordinateSystem()
+        const {x, y} = this.fourier()
+        p5.textSize(18)
+        p5.textAlign(p5.RIGHT);
+        p5.text(`x: ${x.toFixed(2)}\ny: ${y.toFixed(2)}`, this.data.canvas.width - 20, 20)
+        p5.translate(this.data.transform.x, this.data.transform.y)
+        p5.scale(this.data.scale)
+        this.data.p5.grid()
+        
+        const dt = p5.TWO_PI / this.data.fourierX.length;
+        this.data.time += dt;
 
         // p5.noLoop()
         // return;
-        if (this.time > p5.TWO_PI) {
-          if(index < this.pathCoordinates.length - 1) {    
-            if(this.seperate) {
-              index += 1;
-              coordinate()
-            }        
-
-            // for(let i = 0; i < this.images.length; i++) {
-            //   // this.images[i].background(22)
-            //   p5.image(this.images[i], 0, 0)
-            // }
+        if (this.data.time > p5.TWO_PI) {
+          this.data.time = 0;
+          if(this.data.seperate) {
+            if(index < this.data.pathCoordinates.length - 1) {    
+                index += 1;
+                p5.coordinate()     
+            } else {
+              this.data.finished = true
+            }
           } else {
-            this.finished = true
-            // p5.noLoop()
+            this.data.finished = true
           }
-          this.time = 0;
-          // this.path = [];
+
+
+
+          // this.data.path = [];
 
           // p5.noLoop()
         }
@@ -159,16 +159,23 @@ const sketch = {
   },
 
   fourier() {
-    this.p5.background(this.options.background)
-    let v = this.epicycles(this.p5.width / 8, this.p5.height / 8, 0, this.fourierX, this.p5);
-    this.path.unshift(v);
-    this.p5.stroke(this.options.dots.color,100)
-    this.p5.beginShape(this.options.dots.active ? this.p5.POINTS : this.p5.LINES);
-    // this.p5.noFill();
-    for (let i = 0; i < this.path.length; i++) {
-      this.p5.vertex(this.path[i].x, this.path[i].y);
+
+    this.data.p5.push()
+    let v = this.epicycles(this.data.p5.width / 8, this.data.p5.height / 8, 0, this.data.fourierX, this.data.p5);
+    this.data.path.unshift(v);
+    
+    
+    this.data.p5.strokeWeight(this.data.options.dots.radius)
+    this.data.p5.beginShape(this.data.options.dots.active ? this.data.p5.POINTS : this.data.p5.LINES);
+
+    // this.data.p5.noFill();
+    for (let i = 0; i < this.data.path.length; i++) {
+      this.data.p5.stroke(this.color,100)
+      this.data.p5.vertex(this.data.path[i].x, this.data.path[i].y);
     }
-    this.p5.endShape();
+    this.data.p5.endShape();
+    this.data.p5.pop();
+    return v
   },
 
   epicycles(x, y, rotation, fourier, p5) {
@@ -178,22 +185,23 @@ const sketch = {
       let freq = fourier[i].freq;
       let radius = fourier[i].amp;
       let phase = fourier[i].phase;
-      x += radius * p5.cos(freq * this.time + phase + rotation);
-      y += radius * p5.sin(freq * this.time + phase + rotation);
+      x += radius * p5.cos(freq * this.data.time + phase + rotation);
+      y += radius * p5.sin(freq * this.data.time + phase + rotation);
   
-      // if (this.time > p5.TWO_PI) {
-      //   // this.time = 0;
+      // if (this.data.time > p5.TWO_PI) {
+      //   // this.data.time = 0;
       //   break;
       // }
   
-      if(!this.finished){
-
-        p5.stroke(this.options.ellipseStroke.color, this.options.ellipseStroke.opacity);
+      if(!this.data.finished){
+        p5.stroke(fourier[i].color, this.data.options.ellipseStroke.opacity);
         p5.noFill();
         p5.ellipse(prevx, prevy, radius * 2);
 
-        p5.stroke(this.options.lineStroke.color, this.options.lineStroke.opacity);
+        p5.stroke(fourier[i].color, this.data.options.lineStroke.opacity);
         p5.line(prevx, prevy, x, y);
+      } else {
+        this.data.p5.noLoop()
       }
     }
     return p5.createVector(x, y);

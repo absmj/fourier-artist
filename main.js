@@ -11,7 +11,7 @@ const sketchData = {
       width: window.screen.width,
       height: window.screen.height,
     },
-    waveCount: 5000,
+    waveCount: 200,
     scale: 1,
     transform: {
       x: 0,
@@ -25,7 +25,7 @@ const sketchData = {
     path: [],
     time: 0,
     finished: false,
-    seperate: false,
+    seperate: true,
     record: false,
     options: {
       background: 255,

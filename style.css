@@ -276,3 +276,36 @@ input[type="file"] {
   width: 16px;
   display: inline-block;
 }
+
+.slider-text {
+  margin-bottom: 2px;
+  margin-top: 20px;
+}
+
+.adjust {
+  width: 50px;
+}
+
+.color-picker {
+  width: 50px;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.dark-selected {
+  background-color: #616467;
+  color: white;
+  border-color: #616467;
+}
+
+.dark-selected:hover {
+  color: white;
+}
+
+.non-selected {
+  color: #616467;
+}
+
+.non-selected:hover {
+  color: white;
+}
