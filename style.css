@@ -309,3 +309,20 @@ input[type="file"] {
 .non-selected:hover {
   color: white;
 }
+
+#loading {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, .30);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 20em;
+  min-height: 20em;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}

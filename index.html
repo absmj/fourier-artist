@@ -51,25 +51,16 @@
           <h2>Import SVG</h2>
           <hr>
           <div v-show="svg">
-            <div class="d-flex justify-content-center align-items-center" id="svg-content"></div>
+            <div class="d-flex justify-content-center align-items-center d-none" id="svg-content"></div>
+            <div class="d-flex justify-content-center align-items-center" id="svg-content-org"></div>
             <hr>
           </div>
           <label for="file-upload" class="custom-file-upload">
             Select File
           </label>
-          
+
           <input id="file-upload" type="file" @change="handleFile" />
           <div :style='{stroke: error ? "#EB1E32" : "#F037A5"}' ref="svgHolder" id='svg-holder'></div>
-
-
-          <p v-if="error" class='nestpas'>Error: Ceci n'est pas une SVG</p>
-
-          <div v-if="svgTextError" class='cm-input' ref="code-mirror-input">
-
-            <div class='svg-text-error'>
-              <p>{{svgTextError}}</p>
-            </div>
-          </div>
 
           <hr>
           <div class="form-floating">
@@ -84,8 +75,8 @@
              {{/each}} -->
           </div>
           <hr>
-          <p>Find more SVGs at the <a data-bs-toggle="modal" data-bs-target="#api-modal">Noun Project</a> 
-            or <a data-bs-toggle="modal" data-bs-target="#api-modal">Wikimedia Commons</a></p>
+          <p>Find more SVGs at the <a data-bs-toggle="modal" @click="selectedApi=0" data-bs-target="#api-modal">Noun Project</a>
+            or <a data-bs-toggle="modal" @click="selectedApi=1" data-bs-target="#api-modal">Wikimedia Commons</a></p>
         </div>
 
         <div class='step-2' :class="step==2?'d-block':'d-none'">
@@ -196,15 +187,15 @@
               <div class="col-12">
                 <div class="d-grid gap-2">
                   <a @click='svgInstance.options.color="random"' class="btn btn-primary fw-bold">
-                    <span :style="{color:confetti}">C</span>
-                    <span :style="{color:confetti}">o</span>
-                    <span :style="{color:confetti}">n</span>
-                    <span :style="{color:confetti}">f</span>
-                    <span :style="{color:confetti}">e</span>
-                    <span :style="{color:confetti}">t</span>
-                    <span :style="{color:confetti}">t</span>
-                    <span :style="{color:confetti}">i</span>
-                    <span :style="{color:confetti}">!</span>
+                    <span :style="{color:confetti()}">C</span>
+                    <span :style="{color:confetti()}">o</span>
+                    <span :style="{color:confetti()}">n</span>
+                    <span :style="{color:confetti()}">f</span>
+                    <span :style="{color:confetti()}">e</span>
+                    <span :style="{color:confetti()}">t</span>
+                    <span :style="{color:confetti()}">t</span>
+                    <span :style="{color:confetti()}">i</span>
+                    <span :style="{color:confetti()}">!</span>
                   </a>
                 </div>
               </div>
@@ -221,55 +212,76 @@
       <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title">Modal title</h5>
+            <h5 class="modal-title" v-html="getApi.title"></h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="modal-body">
+          <div class="modal-body position-relative">
+
+            <div id="loading" v-if="getApi.loading">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+
             <div class="row g-2">
               <div class="col-10">
-                <input type="search" id="query" name="query" v-model="api.query" class="form-control" aria-describedby="passwordHelpBlock">
+                <input type="search" id="query" name="query" v-model="getApi.query" class="form-control"
+                  aria-describedby="passwordHelpBlock">
               </div>
               <div class="col-2">
                 <div class="d-grid gap-2">
-                  <button @click="searchFromApi()" class="btn btn-primary">Search</button>
+                  <button :disabled="getApi.loading" @click="search()" class="btn btn-primary">Search</button>
                 </div>
               </div>
             </div>
             <hr>
-            <div v-if="api.samples.length > 0" class="row g-3 justify-content-center">
-              <div v-for="sample in api.samples" :key="sample.id" class="col-auto">
+            <div v-if="getApi.samples.length > 0" class="row g-3 justify-content-center">
+              <div v-for="sample in getApi.samples" :key="sample.id" class="col-auto">
                 <div class="card" style="width: 12rem;">
                   <img :src="sample.thumbnail_url" class="card-img-top" :alt="sample.attribution">
                   <div class="card-body">
                     <h5 class="card-title">{{sample.attribution}}</h5>
                     <p class="card-text">{{sample.creator.name}}</p>
                     <div class="d-grid gap-2">
-                      <a href="#" class="btn btn-primary">Select</a>
+                      <button :disabled="getApi.loading || sample.id == getApi.selected" class="btn btn-primary" @click="select(sample.id)">Select</button>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            <button type="button" class="btn btn-primary">Save changes</button>
+          <div class="modal-footer justify-content-start">
+            <p v-html="getApi.info"></p>
           </div>
         </div>
       </div>
     </div>
+
+    <div class="toast-container position-fixed d-flex justify-content-end bottom-0 p-4 w-100">
+      <div id="error-toast" class="toast align-items-center text-bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+          <div class="toast-body">
+           {{error}}
+          </div>
+          <button type="button" class="btn-close btn-close-white me-2 me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+      </div>
+    </div>
+
+    
   </div>
 </body>
-<script src="main.js"></script>
+<script src="/main.js"></script>
+<script src="/api.js"></script>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
   integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-<script src="helpers/pathologist.js"></script>
-<script src="libraries/p5.min.js"></script>
-<script src="libraries/p5.sound.min.js"></script>
-<script src="helpers/d3-array.js"></script>
-<script src="helpers/ct.js"></script>
-<script src="helpers/complex.js"></script>
+<script src="/helpers/pathologist.js"></script>
+<script src="/libraries/p5.min.js"></script>
+<script src="/libraries/p5.sound.min.js"></script>
+<script src="/helpers/d3-array.js"></script>
+<script src="/helpers/ct.js"></script>
+<script src="/helpers/complex.js"></script>
 
 <script src="helpers/coordinates.js"></script>
 <script src="sketch.js"></script>
@@ -279,25 +291,23 @@
 
   const app = createApp({
     setup() {
-      const api = ref({
-        name: 'noun',
-        query: 'happy',
-        samples: [],
-        loading: false
-      })
+      const api = ref(apiList)
+      const selectedApi = ref(0)
+      const toast = ref(null)
       const step = ref(1)
       const svg = ref(null)
       const coordinates = ref([])
       const error = ref(null)
       const svgTextError = ref(null)
       const svgInstance = ref(sketchData)
+      const modal = ref(null)
 
-      return { step, svg, coordinates, error, svgTextError, svgInstance, api }
+      return { step, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal }
     },
-    
+
     computed: {
-      confetti() {
-        return `rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`;
+      getApi() {
+        return this.api[this.selectedApi]
       }
     },
 
@@ -312,6 +322,19 @@
         },
         deep: true
       },
+
+      error(v) {
+        if(!v) {
+          this.toast.hide()
+        } else {
+          this.toast.show()
+        }
+      }
+    },
+
+    mounted() {
+      this.modal = new bootstrap.Modal(document.getElementById("api-modal"))
+      this.toast = bootstrap.Toast.getOrCreateInstance(document.getElementById('error-toast'))
     },
 
     methods: {
@@ -331,29 +354,130 @@
           reader.readAsText(e.target.files[0])
 
         } catch (e) {
-          this.svgTextError = e.message
+          this.error = e.message
         }
       },
 
-      async searchFromApi(more = false) {
+      b64DecodeUnicode(str) {
+        return decodeURIComponent(atob(str).split('').map(function (c) {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+      },
+
+      async search(more = false) {
+        await this[this.getApi.search](more)
+      },
+
+      async select(id) {
+        await this[this.getApi.get](id)
+      },
+
+      async searchFromNounApi(more) {
         try {
-          this.api.loading = true
-          const request = await fetch('http://localhost/index.php', {
+          this.error = null
+          this.getApi.loading = true
+          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search`, {
             method: 'POST',
-            body: JSON.stringify({query: this.api.query})
+            body: JSON.stringify({ query: this.getApi.query })
           })
 
           const response = await request.json()
-          if(more)
-            this.api.samples.push(...response.icons)
+
+          if(!request.ok) throw new Error(response.message);
+
+          if (more)
+            this.getApi.samples.push(...response.icons)
           else
-            this.api.samples.splice(0, 1, ...response.icons)
+            this.getApi.samples = response.icons
 
-        } catch(e) {
 
+        } catch (e) {
+          this.error = e.message ?? e
         } finally {
-          this.api.loading = false
+          this.getApi.loading = false
         }
+      },
+
+
+      async selectFromNounApi(id) {
+        try {
+          this.error = null
+          this.getApi.loading = true;
+          this.getApi.selected = id;
+
+          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=get`, {
+            method: 'POST',
+            body: JSON.stringify({ id: this.getApi.selected })
+          })
+
+          const response = await request.json()
+
+          if(!request.ok) throw new Error(response.message);
+
+          const getApiSvg = await fetch(response.icon.icon_url)
+
+          const svgData = await getApiSvg.text()
+          this.svg = svgData
+          this.modal.hide()
+
+
+        } catch (e) {
+          this.error = e.message ?? e
+        } finally {
+          this.getApi.loading = false;
+        }
+      },
+
+      async searchFromCommonsApi(more) {
+        try {
+          this.error = null
+          this.getApi.loading = true
+          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search`, {
+            method: 'POST',
+            body: JSON.stringify({ query: this.getApi.query })
+          })
+
+          const response = await request.json()
+
+          if(!request.ok) throw new Error(response.message);
+
+          if (more)
+            this.getApi.samples.push(...response)
+          else
+            this.getApi.samples = response
+
+
+        } catch (e) {
+          console.log(e)
+          this.error = e.message ?? e
+        } finally {
+          this.getApi.loading = false
+        }
+      },
+
+
+      async selectFromCommonsApi(url) {
+        try {
+          this.error = null
+          this.getApi.loading = true;
+          this.getApi.selected = url;
+          console.log(url)
+          const getApiSvg = await fetch(url)
+
+          const svgData = await getApiSvg.text()
+          this.svg = svgData
+          this.modal.hide()
+
+
+        } catch (e) {
+          this.error = e.message ?? e
+        } finally {
+          this.getApi.loading = false;
+        }
+      },
+
+      confetti() {
+        return `rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`;
       }
     },
   })

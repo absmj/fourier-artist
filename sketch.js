@@ -35,16 +35,16 @@ let sketch = {
   
       this.data.pathCoordinates = new Array()
       const svgContainer = document.querySelector('#svg-content')
-
+      const svgContainerOriginal = document.querySelector('#svg-content-org')
       this.data.svg.original = coordinate
       this.data.svg.pathologize = pathologize(coordinate)
-  
-      svgContainer.innerHTML = coordinate
-      this.data.svg.el = document.querySelector('#svg-content > svg')
+
+      svgContainerOriginal.innerHTML = this.data.svg.original
+      svgContainer.innerHTML = this.data.svg.pathologize
+      this.data.svg.el = document.querySelector('#svg-content-org > svg')
       this.data.svg.el.setAttribute('width', '200')
       this.data.svg.el.setAttribute('height', '200')
-      const paths = document.querySelectorAll('path')
-
+      const paths = document.querySelectorAll('#svg-content * path')
       if(this.data.seperate)
         this.data.pathCoordinates = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
       else

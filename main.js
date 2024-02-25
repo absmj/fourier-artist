@@ -11,7 +11,7 @@ const sketchData = {
       width: window.screen.width,
       height: window.screen.height,
     },
-    waveCount: 200,
+    waveCount: 5000,
     scale: 1,
     transform: {
       x: 0,
@@ -25,15 +25,15 @@ const sketchData = {
     path: [],
     time: 0,
     finished: false,
-    seperate: true,
+    seperate: false,
     record: false,
     options: {
       background: 255,
       color: 0,
       show: {
-        axis: true,
-        coordinate: true,
-        grid: true
+        axis: false,
+        coordinate: false,
+        grid: false
       },
       dots: {
         radius: 1,
