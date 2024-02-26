@@ -216,13 +216,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body position-relative">
-
-            <div id="loading" v-if="getApi.loading">
-              <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
-
             <div class="row g-2">
               <div class="col-10">
                 <input type="search" id="query" name="query" v-model="getApi.query" class="form-control"
@@ -235,6 +228,11 @@
               </div>
             </div>
             <hr>
+            <div :class="getApi.samples.length > 0 ? 'position-absolute' : ''" id="loading" v-if="getApi.loading">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
             <div v-if="getApi.samples.length > 0" class="row g-3 justify-content-center">
               <div v-for="sample in getApi.samples" :key="sample.id" class="col-auto">
                 <div class="card" style="width: 12rem;">
@@ -376,7 +374,7 @@
         try {
           this.error = null
           this.getApi.loading = true
-          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search`, {
+          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=search`, {
             method: 'POST',
             body: JSON.stringify({ query: this.getApi.query })
           })
@@ -405,7 +403,7 @@
           this.getApi.loading = true;
           this.getApi.selected = id;
 
-          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=get`, {
+          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=get`, {
             method: 'POST',
             body: JSON.stringify({ id: this.getApi.selected })
           })
@@ -432,7 +430,7 @@
         try {
           this.error = null
           this.getApi.loading = true
-          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search`, {
+          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=search`, {
             method: 'POST',
             body: JSON.stringify({ query: this.getApi.query })
           })
