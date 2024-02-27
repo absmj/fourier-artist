@@ -9,6 +9,28 @@ let sketch = {
       : this.data.p5.color(this.data.options.color)
   },
 
+  optimize: {
+    center(canvas, svg) {
+      const s = this.scale(canvas,svg)
+      const a = aspectRatio(canvas.width, canvas.height)
+      const b = aspectRatio(svg.width, svg.height)
+
+      console.log(a, b)
+      // console.log(b[0] / b[1])
+      svg.width *= s
+      svg.height *= s
+
+      return {
+        x: canvas.width - (svg.width / 2),
+        y: canvas.height - (svg.height / 2)
+      }
+    },
+
+    scale(canvas, svg) {
+      return Math.floor((canvas.area / svg.area) / 100)
+    }
+  },
+
   mount() {
     if(this.data.p5) {
       index = 0;
@@ -16,13 +38,8 @@ let sketch = {
       this.data.time = 0
       this.data.p5.coordinate()
       this.data.p5.clear()
-
       this.data.p5.loop()
 
-      // this.data.p5.redraw()
-
-
-      // new this.data.p5(this.drawMachine, 'canvasHolder')
     } else {
       new p5(this.drawMachine, 'canvasHolder')
     }
@@ -31,15 +48,23 @@ let sketch = {
   coordinates(coordinate) {
     try {
       index = 0;
-      this.data.finished = false
-  
-      this.data.pathCoordinates = new Array()
-      const svgContainer = document.querySelector('#svg-content')
-      const svgContainerOriginal = document.querySelector('#svg-content-org')
-      this.data.svg.original = coordinate
-      this.data.svg.pathologize = pathologize(coordinate)
+      this.data.finished = false;
+      const canvasEl = document.getElementById("canvasHolder")
+      this.data.canvas.width = canvasEl.offsetWidth
+      this.data.canvas.height = canvasEl.offsetHeight
+      this.data.pathCoordinates = new Array();
+      const svgContainer = document.querySelector('#svg-content');
+      const svgContainerOriginal = document.querySelector('#svg-content-org');
+      this.data.svg.original = coordinate;
+      this.data.svg.pathologize = pathologize(coordinate);
 
-      svgContainerOriginal.innerHTML = this.data.svg.original
+      svgContainerOriginal.innerHTML = this.data.svg.original;
+      this.data.svg.width = svgContainerOriginal.children[0].getAttribute('width');
+      this.data.svg.height = svgContainerOriginal.children[0].getAttribute('height');
+
+      this.scale = this.optimize.scale(this.data.canvas,this.data.svg)
+      this.transform = this.optimize.center(this.data.canvas, this.data.svg)
+
       svgContainer.innerHTML = this.data.svg.pathologize
       this.data.svg.el = document.querySelector('#svg-content-org > svg')
       this.data.svg.el.setAttribute('width', '200')
@@ -112,9 +137,6 @@ let sketch = {
       }
     
       p5.setup = () => {
-        const canvasEl = document.getElementById("canvasHolder")
-        this.data.canvas.width = canvasEl.offsetWidth
-        this.data.canvas.height = canvasEl.offsetHeight
         p5.createCanvas(this.data.canvas.width, this.data.canvas.height);
 
         p5.coordinate()

@@ -100,7 +100,7 @@
                 <input class='form-control' type='text' v-model='svgInstance.scale' />
               </div>
               <div class="col-12">
-                <input class="form-range" type='range' min='1' max='10' v-model='svgInstance.scale' />
+                <input class="form-range" type='range' min='0.1' max='10' step="0.1" v-model.number='svgInstance.scale' />
               </div>
             </div>
             <hr>
@@ -238,13 +238,17 @@
                 <div class="card" style="width: 12rem;">
                   <img :src="sample.thumbnail_url" class="card-img-top" :alt="sample.attribution">
                   <div class="card-body">
-                    <h5 class="card-title">{{sample.attribution}}</h5>
+                    <h6 class="card-title">{{sample.attribution.replace(/^(.{15})(.*)/, '$1...')}}</h6>
                     <p class="card-text">{{sample.creator.name}}</p>
                     <div class="d-grid gap-2">
                       <button :disabled="getApi.loading || sample.id == getApi.selected" class="btn btn-primary" @click="select(sample.id)">Select</button>
                     </div>
                   </div>
                 </div>
+              </div>
+              <hr>
+              <div class="d-flex justify-content-center">
+                <button :disabled="getApi.loading" @click="searchFromCommonsApi(true)" class="btn btn-primary">Load more...</button>
               </div>
             </div>
           </div>
@@ -280,7 +284,7 @@
 <script src="/helpers/d3-array.js"></script>
 <script src="/helpers/ct.js"></script>
 <script src="/helpers/complex.js"></script>
-
+<script src="/helpers/util.js"></script>
 <script src="helpers/coordinates.js"></script>
 <script src="sketch.js"></script>
 
@@ -299,8 +303,9 @@
       const svgTextError = ref(null)
       const svgInstance = ref(sketchData)
       const modal = ref(null)
+      const page = ref(0)
 
-      return { step, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal }
+      return { step, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal, page }
     },
 
     computed: {
@@ -372,9 +377,9 @@
 
       async searchFromNounApi(more) {
         try {
-          this.error = null
-          this.getApi.loading = true
-          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=search`, {
+          this.error = null;
+          this.getApi.loading = true;
+          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search`, {
             method: 'POST',
             body: JSON.stringify({ query: this.getApi.query })
           })
@@ -403,7 +408,7 @@
           this.getApi.loading = true;
           this.getApi.selected = id;
 
-          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=get`, {
+          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=get`, {
             method: 'POST',
             body: JSON.stringify({ id: this.getApi.selected })
           })
@@ -428,9 +433,10 @@
 
       async searchFromCommonsApi(more) {
         try {
+          this.page += 1
           this.error = null
           this.getApi.loading = true
-          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=search`, {
+          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search&page=${this.page}`, {
             method: 'POST',
             body: JSON.stringify({ query: this.getApi.query })
           })

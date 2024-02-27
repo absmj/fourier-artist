@@ -4,12 +4,26 @@ const sketchData = {
       el: null,
       original: null,
       pathologize: null,
+      width: 0,
+      height: 0,
+      get area() {
+        return this.width * this.height
+      },
+
+      get aspect() {
+        return [
+          
+        ]
+      }
     },
 
     canvas: {
       id: `fourier-art-${Math.floor(Math.random() * 10 + (10 - 1))}`,
       width: window.screen.width,
       height: window.screen.height,
+      get area() {
+        return this.width * this.height
+      }
     },
     waveCount: 5000,
     scale: 1,

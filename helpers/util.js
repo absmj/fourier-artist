@@ -1,11 +1,13 @@
-const chunkArray = (arr, size = 2) => {
-    let results = []
-    while (arr.length) {
-        results.push(arr.splice(0, size))
-    }
-    return results
-}
+const gcd = (a, b) => {
+    return b
+        ? gcd(b, a % b)
+        : a;
+};
 
-const calcValue = (val, base) => {
-    return /%$/.test(val) ? (val.replace('%', '') * 100) / base : +val
-}
+const aspectRatio = (width, height, toString=false) => {
+    const divisor = gcd(width, height);
+
+    return !toString ? [width / divisor, height / divisor] : `${width / divisor}:${height / divisor}`;
+};
+
+const area = (w, h) => w * h 

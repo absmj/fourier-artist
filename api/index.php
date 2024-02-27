@@ -37,7 +37,7 @@ switch($_GET['api']) {
         break;
     
     case "commons":
-        return commons();
+        return commons($_GET['page'] ?? 0);
     
     default:
         throw new Exception("This API doesn't supported", 401);
@@ -67,8 +67,9 @@ function nounProject($url_ = '', array $params = null) {
     echo $rsp;
 }
 
-function commons() {
-    $url = "https://commons.wikimedia.org/w/api.php?action=query&format=json&uselang=az&generator=search&gsrsearch=filetype%3Abitmap%7Cdrawing%20-fileres%3A0%20".$_POST['query']."%20svg&gsrlimit=40&gsroffset=120&gsrinfo=totalhits%7Csuggestion&gsrprop=size%7Cwordcount%7Ctimestamp%7Csnippet&prop=info%7Cimageinfo%7Centityterms&inprop=url&gsrnamespace=6&iiprop=url%7Csize%7Cmime&iiurlheight=180&wbetterms=label";
+function commons($page = 0, $limit = 40) {
+    $url = "https://commons.wikimedia.org/w/api.php?action=query&format=json&uselang=az&generator=search&gsrsearch=filetype%3Abitmap%7Cdrawing%20-fileres%3A0%20".$_POST['query']."%20svg&gsrlimit={$limit}&gsroffset=".($limit * $page)."&gsrinfo=totalhits%7Csuggestion&gsrprop=size%7Cwordcount%7Ctimestamp%7Csnippet&prop=info%7Cimageinfo%7Centityterms&inprop=url&gsrnamespace=6&iiprop=url%7Csize%7Cmime&iiurlheight=180&wbetterms=label";
+
     $data = [];
 
     $ch = curl_init();
@@ -86,7 +87,7 @@ function commons() {
         if(!isset($page['imageinfo']) || !is_array($page['imageinfo'])) continue;
         
         foreach($page['imageinfo'] as $id => $image) {
-            if(!preg_match('/svg/', $image['mime']) || !preg_match('/'.$_POST['query'].'/uis', $page['title'])) continue;
+            if(!preg_match('/svg/', $image['mime'])) continue;
 
             array_push($data, [
                 'id' => $image['url'],
