@@ -12,7 +12,7 @@ const sketchData = {
 
       get aspect() {
         return [
-          
+
         ]
       }
     },
@@ -41,27 +41,28 @@ const sketchData = {
     finished: false,
     seperate: false,
     record: false,
-    options: {
-      background: 255,
-      color: 0,
-      show: {
-        axis: false,
-        coordinate: false,
-        grid: false
-      },
-      dots: {
-        radius: 1,
-        active: true,
-        scale: 1,
-        opacity: 100
-      },
-      lineStroke: {
-        opacity: 20,
-        color: 0
-      },
-      ellipseStroke: {
-        opacity: 20,
-        color: 0
-      }
+  }
+
+  const options = {
+    background: 255,
+    color: 0,
+    show: {
+      axis: false,
+      coordinate: false,
+      grid: false
+    },
+    dots: {
+      radius: 1,
+      active: true,
+      scale: 1,
+      opacity: 100
+    },
+    lineStroke: {
+      opacity: 20,
+      color: 0
+    },
+    ellipseStroke: {
+      opacity: 20,
+      color: 0
     }
   }

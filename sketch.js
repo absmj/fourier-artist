@@ -2,37 +2,35 @@
 let index = 0;
 let sketch = {
   data: sketchData,
+  options,
 
   get color() {
-    return this.data.options.color == 'random' ? 
-       this.data.p5.color(`rgb(${Math.round(Math.random()*255)}, ${Math.round(Math.random()*255)}, ${Math.round(Math.random()*255)})`)
-      : this.data.p5.color(this.data.options.color)
+    return this.options.color == 'random' ?
+      this.data.p5.color(`rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`)
+      : this.data.p5.color(this.options.color)
   },
 
   optimize: {
     center(canvas, svg) {
-      const s = this.scale(canvas,svg)
-      const a = aspectRatio(canvas.width, canvas.height)
-      const b = aspectRatio(svg.width, svg.height)
-
-      console.log(a, b)
-      // console.log(b[0] / b[1])
+      const s = this.scale(canvas, svg)
       svg.width *= s
       svg.height *= s
 
       return {
-        x: canvas.width - (svg.width / 2),
-        y: canvas.height - (svg.height / 2)
+        x: ((canvas.width - svg.width) / 2) * 0.5,
+        y: ((canvas.height - svg.height) / 2) * 0.5
       }
     },
 
     scale(canvas, svg) {
-      return Math.floor((canvas.area / svg.area) / 100)
+      const ws = (canvas.width / svg.width) * 0.8
+      const hs = (canvas.height / svg.height) * 0.8
+      return Math.min(ws, hs)
     }
   },
 
   mount() {
-    if(this.data.p5) {
+    if (this.data.p5) {
       index = 0;
       this.data.path = []
       this.data.time = 0
@@ -43,6 +41,10 @@ let sketch = {
     } else {
       new p5(this.drawMachine, 'canvasHolder')
     }
+  },
+
+  update(key, value) {
+    this[key] = value
   },
 
   coordinates(coordinate) {
@@ -59,32 +61,43 @@ let sketch = {
       this.data.svg.pathologize = pathologize(coordinate);
 
       svgContainerOriginal.innerHTML = this.data.svg.original;
-      this.data.svg.width = svgContainerOriginal.children[0].getAttribute('width');
-      this.data.svg.height = svgContainerOriginal.children[0].getAttribute('height');
 
-      this.scale = this.optimize.scale(this.data.canvas,this.data.svg)
-      this.transform = this.optimize.center(this.data.canvas, this.data.svg)
+      const svg = svgContainerOriginal.children[0];
+      if(svg.getAttribute('width') && svg.getAttribute('height')) {
+        this.data.svg.width = svg.getAttribute('width');
+        this.data.svg.height = svg.getAttribute('height');
+      } else {
+        const [,,w,h] = svg.getAttribute('viewBox').split(' ')
+        this.data.svg.width = w;
+        this.data.svg.height = h;
+        console.log(w,h)
+      }
+
 
       svgContainer.innerHTML = this.data.svg.pathologize
       this.data.svg.el = document.querySelector('#svg-content-org > svg')
       this.data.svg.el.setAttribute('width', '200')
       this.data.svg.el.setAttribute('height', '200')
-      const paths = document.querySelectorAll('#svg-content * path')
-      if(this.data.seperate)
-        this.data.pathCoordinates = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
-      else
-        this.data.pathCoordinates[0] = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
-
       return this;
-    } catch(e) {
+    } catch (e) {
       console.error(e)
     }
+  },
+
+  calculation() {
+    const paths = document.querySelectorAll('#svg-content * path')
+    if (this.data.seperate)
+      this.data.pathCoordinates = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
+    else
+      this.data.pathCoordinates[0] = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
+
+    return this;
   },
 
   set index(index) {
     this.data.currentIndex = index;
   },
-  
+
   get drawMachine() {
     return p5 => {
 
@@ -99,17 +112,17 @@ let sketch = {
         }
         // currentImage = this.data.images[index]
 
-        this.data.fourierX = dft(this.data.x, this.data.p5).map(v => ({...v, color: this.color}));
+        this.data.fourierX = dft(this.data.x, this.data.p5).map(v => ({ ...v, color: this.color }));
         this.data.fourierX.sort((a, b) => b.amp - a.amp);
 
-   
+
       }
 
       p5.grid = () => {
         p5.push();
-        p5.drawingContext.setLineDash([5,5])
-        for(let w = 0; w < this.data.canvas.width; w+=this.data.canvas.width/10) {
-          for(let h = 0; h < this.data.canvas.height; h+=this.data.canvas.height/10) {
+        p5.drawingContext.setLineDash([5, 5])
+        for (let w = 0; w < this.data.canvas.width; w += this.data.canvas.width / 10) {
+          for (let h = 0; h < this.data.canvas.height; h += this.data.canvas.height / 10) {
             p5.stroke(0, 20);
             p5.strokeWeight(1);
             p5.line(w, 0, w, this.data.canvas.height);
@@ -122,12 +135,12 @@ let sketch = {
       p5.coordinateSystem = () => {
         p5.push()
         p5.fill(0)
-        
+
         // p5.line(0, 0, 0, this.data.canvas.height)
         p5.line(20, 0, 20, this.data.canvas.height)
         p5.line(0, this.data.canvas.height - 20, this.data.canvas.width, this.data.canvas.height - 20)
-        p5.triangle(20,10,15,20,25,20)
-        p5.triangle(this.data.canvas.width - 10,this.data.canvas.height - 20,this.data.canvas.width - 20,this.data.canvas.height - 15,this.data.canvas.width - 20,this.data.canvas.height - 25)
+        p5.triangle(20, 10, 15, 20, 25, 20)
+        p5.triangle(this.data.canvas.width - 10, this.data.canvas.height - 20, this.data.canvas.width - 20, this.data.canvas.height - 15, this.data.canvas.width - 20, this.data.canvas.height - 25)
 
         p5.pop()
       }
@@ -135,7 +148,7 @@ let sketch = {
       p5.preload = () => {
         this.data.p5 = p5
       }
-    
+
       p5.setup = () => {
         p5.createCanvas(this.data.canvas.width, this.data.canvas.height);
 
@@ -143,12 +156,12 @@ let sketch = {
 
         // currentImage = this.data.p5.createGraphics(this.data.canvas.width, this.data.canvas.height)
       }
-    
-      p5.draw =  () => {
-        this.data.p5.background(this.data.options.background)
-        if(this.data.options.show.axis) p5.coordinateSystem();
-        const {x, y} = this.fourier()
-        if(this.data.options.show.coordinate) {
+
+      p5.draw = () => {
+        this.data.p5.background(this.options.background)
+        if (this.options.show.axis) p5.coordinateSystem();
+        const { x, y } = this.fourier()
+        if (this.options.show.coordinate) {
           p5.textSize(18)
           p5.textAlign(p5.RIGHT);
           p5.text(`x: ${x.toFixed(2)}\ny: ${y.toFixed(2)}`, this.data.canvas.width - 20, 36)
@@ -157,8 +170,8 @@ let sketch = {
         p5.translate(this.data.transform.x, this.data.transform.y)
         p5.scale(this.data.scale)
 
-        if(this.data.options.show.grid) p5.grid();
-        
+        if (this.options.show.grid) p5.grid();
+
         const dt = p5.TWO_PI / this.data.fourierX.length;
         this.data.time += dt;
 
@@ -166,10 +179,10 @@ let sketch = {
         // return;
         if (this.data.time > p5.TWO_PI) {
           this.data.time = 0;
-          if(this.data.seperate) {
-            if(index < this.data.pathCoordinates.length - 1) {    
-                index += 1;
-                p5.coordinate()     
+          if (this.data.seperate) {
+            if (index < this.data.pathCoordinates.length - 1) {
+              index += 1;
+              p5.coordinate()
             } else {
               this.data.finished = true
             }
@@ -192,14 +205,14 @@ let sketch = {
     this.data.p5.push()
     let v = this.epicycles(this.data.p5.width / 8, this.data.p5.height / 8, 0, this.data.fourierX, this.data.p5);
     this.data.path.unshift(v);
-    
-    
-    this.data.p5.strokeWeight(this.data.options.dots.radius)
-    this.data.p5.beginShape(this.data.options.dots.active ? this.data.p5.POINTS : this.data.p5.LINES);
+
+
+    this.data.p5.strokeWeight(this.options.dots.radius)
+    this.data.p5.beginShape(this.options.dots.active ? this.data.p5.POINTS : this.data.p5.LINES);
 
     // this.data.p5.noFill();
     for (let i = 0; i < this.data.path.length; i++) {
-      this.data.p5.stroke(this.color,100)
+      this.data.p5.stroke(this.color, 100)
       this.data.p5.vertex(this.data.path[i].x, this.data.path[i].y);
     }
     this.data.p5.endShape();
@@ -216,18 +229,18 @@ let sketch = {
       let phase = fourier[i].phase;
       x += radius * p5.cos(freq * this.data.time + phase + rotation);
       y += radius * p5.sin(freq * this.data.time + phase + rotation);
-  
+
       // if (this.data.time > p5.TWO_PI) {
       //   // this.data.time = 0;
       //   break;
       // }
-  
-      if(!this.data.finished){
-        p5.stroke(fourier[i].color, this.data.options.ellipseStroke.opacity);
+
+      if (!this.data.finished) {
+        p5.stroke(fourier[i].color, this.options.ellipseStroke.opacity);
         p5.noFill();
         p5.ellipse(prevx, prevy, radius * 2);
 
-        p5.stroke(fourier[i].color, this.data.options.lineStroke.opacity);
+        p5.stroke(fourier[i].color, this.options.lineStroke.opacity);
         p5.line(prevx, prevy, x, y);
       } else {
         this.data.p5.noLoop()

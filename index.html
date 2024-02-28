@@ -14,199 +14,202 @@
 
 <body>
   <div class="all" id="app">
-    <div class="control-panels">
-
-      <!-- Navigation -->
-      <div class='nav-panel'>
-        <div class='side-bar-text'>
-          <h1>coördinator </h1>
-          <p>Turn an SVG into XY coördinates.
-            <br /> Made by <a href='https://twitter.com/alizauf'>Aliza Aufrichtig</a> @ <a
-              href='https://www.spotify.com'>Spotify</a>
-          </p>
+    <div class="row">
+      <div class="col-5">
+        <div class="row">
+          <!-- Navigation -->
+          <div class='nav-panel col-6 position-relative h-100'>
+            <div class='side-bar-text'>
+              <h1>coördinator </h1>
+              <p>Turn an SVG into XY coördinates.
+                <br /> Made by <a href='https://twitter.com/alizauf'>Aliza Aufrichtig</a> @ <a
+                  href='https://www.spotify.com'>Spotify</a>
+              </p>
+            </div>
+            <ol>
+              <li :class='step === 1 ? "selected-step": "non-selected-step"' @click='step = 1'>
+                Import SVG
+              </li>
+              <li :class='step === 2 ? "selected-step": "non-selected-step"' @click='step = 2'>
+                Refine Dots
+              </li>
+              <li :class='step === 3 ? "selected-step": "non-selected-step"' @click='step = 3'>
+                Get Coördinates
+              </li>
+    
+            </ol>
+    
+            <ol class='credits-placer'>
+              <li class='credits' :class='step === 4 ? "selected-step": "non-selected-step"' @click='step = 4'>
+                why this exists, thanks & credits
+              </li>
+            </ol>
+          </div>
+    
+          <div class="active-step-panel col-6 h-100">
+            <!-- Svg input -->
+            <div class='step-1' :class='step === 1 ? "d-block" : "d-none"'>
+              <h2>Import SVG</h2>
+              <hr>
+              <div v-show="svg">
+                <div class="d-flex justify-content-center align-items-center d-none" id="svg-content"></div>
+                <div class="d-flex justify-content-center align-items-center" id="svg-content-org"></div>
+                <hr>
+              </div>
+              <label for="file-upload" class="custom-file-upload">
+                Select File
+              </label>
+    
+              <input id="file-upload" type="file" @change="handleFile" />
+              <div :style='{stroke: error ? "#EB1E32" : "#F037A5"}' ref="svgHolder" id='svg-holder'></div>
+    
+              <hr>
+              <div class="form-floating">
+                <textarea id="coord-content" v-model="svg" class="form-control" style="height: 200px">{{svg}}</textarea>
+                <label for="floatingTextarea2">or paste SVG text file below</label>
+              </div>
+              <hr>
+              <h3>...or try an example</h3>
+              <div class='example-container'>
+                <!-- {{#each Object.keys(examples) as example }}
+                <button on:click='setNewSVG(examples[example], true, example)' class='dot-button {{selectedExample === example ? "selected-dot-button" : ""}}'>{{{examples[example]}}}</button>
+                 {{/each}} -->
+              </div>
+              <hr>
+              <p>Find more SVGs at the <a data-bs-toggle="modal" @click="selectedApi=0" data-bs-target="#api-modal">Noun Project</a>
+                or <a data-bs-toggle="modal" @click="selectedApi=1" data-bs-target="#api-modal">Wikimedia Commons</a></p>
+            </div>
+    
+            <div class='step-2' :class="step==2?'d-block':'d-none'">
+              <h2>Refine Dots</h2>
+    
+              <fieldset :disabled="!svg">
+                <div class="row">
+                  <label class="col-8 col-form-label" for="">Number of points:</label>
+                  <div class="col-4">
+                    <input class='form-control' type='text' v-model='svgInstance.waveCount' />
+                  </div>
+                  <div class="col-12">
+                    <input class="form-range" type='range' min='1' max='5000' v-model='svgInstance.waveCount' />
+                  </div>
+                </div>
+                <hr>
+    
+                <div class="row">
+                  <label class="col-8 col-form-label" for="">Scale:</label>
+                  <div class="col-4">
+                    <input class='form-control' type='text' v-model='svgInstance.scale' />
+                  </div>
+                  <div class="col-12">
+                    <input class="form-range" type='range' min='0.1' max='10' step="0.1" v-model.number='svgInstance.scale' />
+                  </div>
+                </div>
+                <hr>
+    
+                <div class="row">
+                  <label class="col-8 col-form-label" for="">TranslateX:</label>
+                  <div class="col-4">
+                    <input class='form-control' type='text' v-model.number='svgInstance.transform.x' />
+                  </div>
+                  <div class="col-12">
+                    <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width' step="1"
+                      v-model.number='svgInstance.transform.x' />
+                  </div>
+                </div>
+                <hr>
+    
+                <div class="row">
+                  <label class="col-8 col-form-label" for="">TranslateY:</label>
+                  <div class="col-4">
+                    <input class='form-control' type='text' v-model.number='svgInstance.transform.y' />
+                  </div>
+                  <div class="col-12">
+                    <input class="form-range" type='range' min='1' :max='svgInstance.canvas.height' step="1"
+                      v-model.number='svgInstance.transform.y' />
+                  </div>
+                </div>
+                <hr>
+    
+                <div class="row">
+                  <div class="col-12">
+                    <div class="form-check">
+                      <input class='form-check-input' type="checkbox" v-model='svgInstance.seperate' />
+                      <label class="form-check-label" for="">Seperate</label>
+                    </div>
+                    <div class="form-check">
+                      <input class='form-check-input' type="checkbox" v-model='options.show.grid' />
+                      <label class="form-check-label" for="">Grid</label>
+                    </div>
+                    <div class="form-check">
+                      <input class='form-check-input' type="checkbox" v-model='options.show.axis' />
+                      <label class="form-check-label" for="">Coordinate axis</label>
+                    </div>
+                    <div class="form-check">
+                      <input class='form-check-input' type="checkbox" v-model='options.show.coordinate' />
+                      <label class="form-check-label" for="">Show coordinates</label>
+                    </div>
+                  </div>
+                </div>
+                <hr>
+    
+                <div class="row">
+                  <label class="col-6 col-form-label" for="">Drawing type:</label>
+                  <div class="col-6 d-flex align-items-center">
+                    <label class="form-check-label" for="flexCheckDefault">
+                      Line
+                    </label>
+                    <div class="form-check form-switch justify-content-between m-0 ms-2">
+                      <input class="form-check-input" type="checkbox" role="switch"
+                        v-model="options.dots.active" id="flexCheckDefault">
+                    </div>
+                    <label class="form-check-label" for="flexCheckDefault">
+                      Dots
+                    </label>
+                  </div>
+                </div>
+                <hr>
+    
+                <div v-if="options.dots.active" class="row">
+                  <label class="col-8 col-form-label" for="">Dot radius:</label>
+                  <div class="col-4">
+                    <input class='form-control' type='text' v-model='options.dots.radius' />
+                  </div>
+                  <div class="col-12">
+                    <input class="form-range" type='range' min='1' max='25' step="1"
+                      v-model='options.dots.radius' />
+                  </div>
+                </div>
+    
+                <div class="row">
+                  <label class="col-8 col-form-label" for="">Color:</label>
+                  <div class="col-4">
+                    <input class='color-picker' type="color" @change='options.color = $event.target.value' />
+                  </div>
+                  <div class="col-12">
+                    <div class="d-grid gap-2">
+                      <a @click='options.color="random"' class="btn btn-primary fw-bold">
+                        <span :style="{color:confetti()}">C</span>
+                        <span :style="{color:confetti()}">o</span>
+                        <span :style="{color:confetti()}">n</span>
+                        <span :style="{color:confetti()}">f</span>
+                        <span :style="{color:confetti()}">e</span>
+                        <span :style="{color:confetti()}">t</span>
+                        <span :style="{color:confetti()}">t</span>
+                        <span :style="{color:confetti()}">i</span>
+                        <span :style="{color:confetti()}">!</span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+    
+              </fieldset>
+    
+            </div>
+          </div>
         </div>
-        <ol>
-          <li :class='step === 1 ? "selected-step": "non-selected-step"' @click='step = 1'>
-            Import SVG
-          </li>
-          <li :class='step === 2 ? "selected-step": "non-selected-step"' @click='step = 2'>
-            Refine Dots
-          </li>
-          <li :class='step === 3 ? "selected-step": "non-selected-step"' @click='step = 3'>
-            Get Coördinates
-          </li>
-
-        </ol>
-
-        <ol class='credits-placer'>
-          <li class='credits' :class='step === 4 ? "selected-step": "non-selected-step"' @click='step = 4'>
-            why this exists, thanks & credits
-          </li>
-        </ol>
       </div>
-
-      <div class="active-step-panel">
-        <!-- Svg input -->
-        <div class='step-1' :class='step === 1 ? "d-block" : "d-none"'>
-          <h2>Import SVG</h2>
-          <hr>
-          <div v-show="svg">
-            <div class="d-flex justify-content-center align-items-center d-none" id="svg-content"></div>
-            <div class="d-flex justify-content-center align-items-center" id="svg-content-org"></div>
-            <hr>
-          </div>
-          <label for="file-upload" class="custom-file-upload">
-            Select File
-          </label>
-
-          <input id="file-upload" type="file" @change="handleFile" />
-          <div :style='{stroke: error ? "#EB1E32" : "#F037A5"}' ref="svgHolder" id='svg-holder'></div>
-
-          <hr>
-          <div class="form-floating">
-            <textarea id="coord-content" v-model="svg" class="form-control" style="height: 200px">{{svg}}</textarea>
-            <label for="floatingTextarea2">or paste SVG text file below</label>
-          </div>
-          <hr>
-          <h3>...or try an example</h3>
-          <div class='example-container'>
-            <!-- {{#each Object.keys(examples) as example }}
-            <button on:click='setNewSVG(examples[example], true, example)' class='dot-button {{selectedExample === example ? "selected-dot-button" : ""}}'>{{{examples[example]}}}</button>
-             {{/each}} -->
-          </div>
-          <hr>
-          <p>Find more SVGs at the <a data-bs-toggle="modal" @click="selectedApi=0" data-bs-target="#api-modal">Noun Project</a>
-            or <a data-bs-toggle="modal" @click="selectedApi=1" data-bs-target="#api-modal">Wikimedia Commons</a></p>
-        </div>
-
-        <div class='step-2' :class="step==2?'d-block':'d-none'">
-          <h2>Refine Dots</h2>
-
-          <fieldset :disabled="!svg">
-            <div class="row">
-              <label class="col-8 col-form-label" for="">Number of points:</label>
-              <div class="col-4">
-                <input class='form-control' type='text' v-model='svgInstance.waveCount' />
-              </div>
-              <div class="col-12">
-                <input class="form-range" type='range' min='1' max='5000' v-model='svgInstance.waveCount' />
-              </div>
-            </div>
-            <hr>
-
-            <div class="row">
-              <label class="col-8 col-form-label" for="">Scale:</label>
-              <div class="col-4">
-                <input class='form-control' type='text' v-model='svgInstance.scale' />
-              </div>
-              <div class="col-12">
-                <input class="form-range" type='range' min='0.1' max='10' step="0.1" v-model.number='svgInstance.scale' />
-              </div>
-            </div>
-            <hr>
-
-            <div class="row">
-              <label class="col-8 col-form-label" for="">TranslateX:</label>
-              <div class="col-4">
-                <input class='form-control' type='text' v-model.number='svgInstance.transform.x' />
-              </div>
-              <div class="col-12">
-                <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width' step="1"
-                  v-model.number='svgInstance.transform.x' />
-              </div>
-            </div>
-            <hr>
-
-            <div class="row">
-              <label class="col-8 col-form-label" for="">TranslateY:</label>
-              <div class="col-4">
-                <input class='form-control' type='text' v-model.number='svgInstance.transform.y' />
-              </div>
-              <div class="col-12">
-                <input class="form-range" type='range' min='1' :max='svgInstance.canvas.height' step="1"
-                  v-model.number='svgInstance.transform.y' />
-              </div>
-            </div>
-            <hr>
-
-            <div class="row">
-              <div class="col-12">
-                <div class="form-check">
-                  <input class='form-check-input' type="checkbox" v-model='svgInstance.seperate' />
-                  <label class="form-check-label" for="">Seperate</label>
-                </div>
-                <div class="form-check">
-                  <input class='form-check-input' type="checkbox" v-model='svgInstance.options.show.grid' />
-                  <label class="form-check-label" for="">Grid</label>
-                </div>
-                <div class="form-check">
-                  <input class='form-check-input' type="checkbox" v-model='svgInstance.options.show.axis' />
-                  <label class="form-check-label" for="">Coordinate axis</label>
-                </div>
-                <div class="form-check">
-                  <input class='form-check-input' type="checkbox" v-model='svgInstance.options.show.coordinate' />
-                  <label class="form-check-label" for="">Show coordinates</label>
-                </div>
-              </div>
-            </div>
-            <hr>
-
-            <div class="row">
-              <label class="col-6 col-form-label" for="">Drawing type:</label>
-              <div class="col-6 d-flex align-items-center">
-                <label class="form-check-label" for="flexCheckDefault">
-                  Line
-                </label>
-                <div class="form-check form-switch justify-content-between m-0 ms-2">
-                  <input class="form-check-input" type="checkbox" role="switch"
-                    v-model="svgInstance.options.dots.active" id="flexCheckDefault">
-                </div>
-                <label class="form-check-label" for="flexCheckDefault">
-                  Dots
-                </label>
-              </div>
-            </div>
-            <hr>
-
-            <div v-if="svgInstance.options.dots.active" class="row">
-              <label class="col-8 col-form-label" for="">Dot radius:</label>
-              <div class="col-4">
-                <input class='form-control' type='text' v-model='svgInstance.options.dots.radius' />
-              </div>
-              <div class="col-12">
-                <input class="form-range" type='range' min='1' max='25' step="1"
-                  v-model='svgInstance.options.dots.radius' />
-              </div>
-            </div>
-
-            <div class="row">
-              <label class="col-8 col-form-label" for="">Color:</label>
-              <div class="col-4">
-                <input class='color-picker' type="color" @change='svgInstance.options.color = $event.target.value' />
-              </div>
-              <div class="col-12">
-                <div class="d-grid gap-2">
-                  <a @click='svgInstance.options.color="random"' class="btn btn-primary fw-bold">
-                    <span :style="{color:confetti()}">C</span>
-                    <span :style="{color:confetti()}">o</span>
-                    <span :style="{color:confetti()}">n</span>
-                    <span :style="{color:confetti()}">f</span>
-                    <span :style="{color:confetti()}">e</span>
-                    <span :style="{color:confetti()}">t</span>
-                    <span :style="{color:confetti()}">t</span>
-                    <span :style="{color:confetti()}">i</span>
-                    <span :style="{color:confetti()}">!</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-          </fieldset>
-
-        </div>
-      </div>
+      <div id='canvasHolder' class='col-7 h-100'></div>
     </div>
-    <div id='canvasHolder' class='image-preview d-flex align-items-center justify-content-center'></div>
 
     <div id="api-modal" class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -305,7 +308,7 @@
       const modal = ref(null)
       const page = ref(0)
 
-      return { step, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal, page }
+      return { step, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal, page, options }
     },
 
     computed: {
@@ -316,12 +319,23 @@
 
     watch: {
       svg(newVal, oldValue) {
-        sketch.coordinates(newVal).mount()
+        sketch.coordinates(newVal);
+        //scaling and centerize
+        sketch.data.scale = sketch.optimize.scale(sketch.data.canvas,sketch.data.svg)
+        sketch.data.transform = sketch.optimize.center(sketch.data.canvas, sketch.data.svg)
+        sketch.calculation().mount()
       },
 
       svgInstance: {
         handler(val) {
-          sketch.coordinates(this.svg).mount()
+          sketch.calculation().mount()
+        },
+        deep: true
+      },
+
+      options: {
+        handler(val) {
+          sketch.update('options', val)
         },
         deep: true
       },
