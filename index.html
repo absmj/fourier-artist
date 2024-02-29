@@ -109,11 +109,11 @@
                 <div class="row">
                   <label class="col-8 col-form-label" for="">TranslateX:</label>
                   <div class="col-4">
-                    <input class='form-control' type='text' v-model.number='svgInstance.transform.x' />
+                    <input class='form-control' type='text' v-model.number='svgInstance.transformX' />
                   </div>
                   <div class="col-12">
-                    <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width' step="1"
-                      v-model.number='svgInstance.transform.x' />
+                    <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width' :min='-svgInstance.canvas.width' step="1"
+                      v-model.number='svgInstance.transformX' />
                   </div>
                 </div>
                 <hr>
@@ -121,11 +121,11 @@
                 <div class="row">
                   <label class="col-8 col-form-label" for="">TranslateY:</label>
                   <div class="col-4">
-                    <input class='form-control' type='text' v-model.number='svgInstance.transform.y' />
+                    <input class='form-control' type='text' v-model.number='svgInstance.transformY' />
                   </div>
                   <div class="col-12">
-                    <input class="form-range" type='range' min='1' :max='svgInstance.canvas.height' step="1"
-                      v-model.number='svgInstance.transform.y' />
+                    <input class="form-range" type='range' min='1' :min='-svgInstance.canvas.height' :max='svgInstance.canvas.height' step="1"
+                      v-model.number='svgInstance.transformY' />
                   </div>
                 </div>
                 <hr>
@@ -321,8 +321,10 @@
       svg(newVal, oldValue) {
         sketch.coordinates(newVal);
         //scaling and centerize
-        sketch.data.scale = sketch.optimize.scale(sketch.data.canvas,sketch.data.svg)
-        sketch.data.transform = sketch.optimize.center(sketch.data.canvas, sketch.data.svg)
+        // sketch.data.scale = sketch.optimize.scale(sketch.data.canvas,sketch.data.svg)
+        // const c = sketch.optimize.center(sketch.data.canvas, sketch.data.svg)
+        // sketch.data.transformX = c.x
+        // sketch.data.transformY = c.y
         sketch.calculation().mount()
       },
 

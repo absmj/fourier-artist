@@ -25,12 +25,10 @@ const sketchData = {
         return this.width * this.height
       }
     },
-    waveCount: 5000,
+    waveCount: 2000,
     scale: 1,
-    transform: {
-      x: 0,
-      y: 0
-    },
+    transformX: 0,
+    transformY: 0,
     images: [],
     currentIndex: 0,
     pathCoordinates: [],

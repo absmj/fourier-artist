@@ -17,26 +17,27 @@ let sketch = {
       svg.height *= s
 
       return {
-        x: ((canvas.width - svg.width) / 2) * 0.5,
-        y: ((canvas.height - svg.height) / 2) * 0.5
+        x: ((canvas.width - svg.width) / 2) * 0.65,
+        y: ((canvas.height - svg.height) / 2) * 0.65
       }
     },
 
     scale(canvas, svg) {
-      const ws = (canvas.width / svg.width) * 0.8
-      const hs = (canvas.height / svg.height) * 0.8
+      const ws = (canvas.width / svg.width) * 0.6
+      const hs = (canvas.height / svg.height) * 0.6
       return Math.min(ws, hs)
     }
   },
 
   mount() {
     if (this.data.p5) {
+      this.data.p5.loop()
       index = 0;
       this.data.path = []
       this.data.time = 0
       this.data.p5.coordinate()
       this.data.p5.clear()
-      this.data.p5.loop()
+      this.data.finished = false
 
     } else {
       new p5(this.drawMachine, 'canvasHolder')
@@ -64,13 +65,12 @@ let sketch = {
 
       const svg = svgContainerOriginal.children[0];
       if(svg.getAttribute('width') && svg.getAttribute('height')) {
-        this.data.svg.width = svg.getAttribute('width');
-        this.data.svg.height = svg.getAttribute('height');
+        this.data.svg.width = parseFloat(svg.getAttribute('width'));
+        this.data.svg.height = parseFloat(svg.getAttribute('height'));
       } else {
         const [,,w,h] = svg.getAttribute('viewBox').split(' ')
         this.data.svg.width = w;
         this.data.svg.height = h;
-        console.log(w,h)
       }
 
 
@@ -87,9 +87,9 @@ let sketch = {
   calculation() {
     const paths = document.querySelectorAll('#svg-content * path')
     if (this.data.seperate)
-      this.data.pathCoordinates = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
+      this.data.pathCoordinates = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transformX, this.data.transformY, this.data.seperate)
     else
-      this.data.pathCoordinates[0] = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transform.x, this.data.transform.y, this.data.seperate)
+      this.data.pathCoordinates[0] = pathsToCoords(paths, this.data.scale, this.data.waveCount, this.data.transformX, this.data.transformY, this.data.seperate)
 
     return this;
   },
@@ -164,11 +164,8 @@ let sketch = {
         if (this.options.show.coordinate) {
           p5.textSize(18)
           p5.textAlign(p5.RIGHT);
-          p5.text(`x: ${x.toFixed(2)}\ny: ${y.toFixed(2)}`, this.data.canvas.width - 20, 36)
+          p5.text(`x: ${x.toFixed(2)}\ny: ${y.toFixed(2)}`, this.data.canvas.width - 40, 36)
         }
-
-        p5.translate(this.data.transform.x, this.data.transform.y)
-        p5.scale(this.data.scale)
 
         if (this.options.show.grid) p5.grid();
 
@@ -243,7 +240,7 @@ let sketch = {
         p5.stroke(fourier[i].color, this.options.lineStroke.opacity);
         p5.line(prevx, prevy, x, y);
       } else {
-        this.data.p5.noLoop()
+        // this.data.p5.noLoop()
       }
     }
     return p5.createVector(x, y);
