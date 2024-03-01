@@ -6,23 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Sketch</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="style.css">
 
 </head>
 
 <body>
   <div class="all" id="app">
-    <div class="row">
-      <div class="col-5">
+    <div class="row justify-content-center align-items-center h-100 position-relative">
+      <div class="col-md-5 control-panel" ref="cpanel" :style="{'--control-panel-width': controlPanel.width}" :class="svg ? 'l-1' : ''">
         <div class="row">
           <!-- Navigation -->
-          <div class='nav-panel col-6 position-relative h-100'>
+          <div class='nav-panel col-6 position-relative p-0 p-3'>
             <div class='side-bar-text'>
-              <h1>coördinator </h1>
+              <h1>Fourier artist</h1>
               <p>Turn an SVG into XY coördinates.
-                <br /> Made by <a href='https://twitter.com/alizauf'>Aliza Aufrichtig</a> @ <a
+                <br /> Made by <a href='https://twitter.com/alizauf'>Abbas Majidov</a> @ <a
                   href='https://www.spotify.com'>Spotify</a>
               </p>
             </div>
@@ -36,17 +35,17 @@
               <li :class='step === 3 ? "selected-step": "non-selected-step"' @click='step = 3'>
                 Get Coördinates
               </li>
-    
+
             </ol>
-    
+
             <ol class='credits-placer'>
               <li class='credits' :class='step === 4 ? "selected-step": "non-selected-step"' @click='step = 4'>
                 why this exists, thanks & credits
               </li>
             </ol>
           </div>
-    
-          <div class="active-step-panel col-6 h-100">
+
+          <div class="active-step-panel col-6 p-3">
             <!-- Svg input -->
             <div class='step-1' :class='step === 1 ? "d-block" : "d-none"'>
               <h2>Import SVG</h2>
@@ -59,10 +58,10 @@
               <label for="file-upload" class="custom-file-upload">
                 Select File
               </label>
-    
+
               <input id="file-upload" type="file" @change="handleFile" />
               <div :style='{stroke: error ? "#EB1E32" : "#F037A5"}' ref="svgHolder" id='svg-holder'></div>
-    
+
               <hr>
               <div class="form-floating">
                 <textarea id="coord-content" v-model="svg" class="form-control" style="height: 200px">{{svg}}</textarea>
@@ -76,13 +75,15 @@
                  {{/each}} -->
               </div>
               <hr>
-              <p>Find more SVGs at the <a data-bs-toggle="modal" @click="selectedApi=0" data-bs-target="#api-modal">Noun Project</a>
-                or <a data-bs-toggle="modal" @click="selectedApi=1" data-bs-target="#api-modal">Wikimedia Commons</a></p>
+              <p>Find more SVGs at the <a data-bs-toggle="modal" @click="selectedApi=0" data-bs-target="#api-modal">Noun
+                  Project</a>
+                or <a data-bs-toggle="modal" @click="selectedApi=1" data-bs-target="#api-modal">Wikimedia Commons</a>
+              </p>
             </div>
-    
+
             <div class='step-2' :class="step==2?'d-block':'d-none'">
               <h2>Refine Dots</h2>
-    
+
               <fieldset :disabled="!svg">
                 <div class="row">
                   <label class="col-8 col-form-label" for="">Number of points:</label>
@@ -94,42 +95,43 @@
                   </div>
                 </div>
                 <hr>
-    
+
                 <div class="row">
                   <label class="col-8 col-form-label" for="">Scale:</label>
                   <div class="col-4">
                     <input class='form-control' type='text' v-model='svgInstance.scale' />
                   </div>
                   <div class="col-12">
-                    <input class="form-range" type='range' min='0.1' max='10' step="0.1" v-model.number='svgInstance.scale' />
+                    <input class="form-range" type='range' min='0.1' max='10' step="0.1"
+                      v-model.number='svgInstance.scale' />
                   </div>
                 </div>
                 <hr>
-    
+
                 <div class="row">
                   <label class="col-8 col-form-label" for="">TranslateX:</label>
                   <div class="col-4">
                     <input class='form-control' type='text' v-model.number='svgInstance.transformX' />
                   </div>
                   <div class="col-12">
-                    <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width' :min='-svgInstance.canvas.width' step="1"
-                      v-model.number='svgInstance.transformX' />
+                    <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width'
+                      :min='-svgInstance.canvas.width' step="1" v-model.number='svgInstance.transformX' />
                   </div>
                 </div>
                 <hr>
-    
+
                 <div class="row">
                   <label class="col-8 col-form-label" for="">TranslateY:</label>
                   <div class="col-4">
                     <input class='form-control' type='text' v-model.number='svgInstance.transformY' />
                   </div>
                   <div class="col-12">
-                    <input class="form-range" type='range' min='1' :min='-svgInstance.canvas.height' :max='svgInstance.canvas.height' step="1"
-                      v-model.number='svgInstance.transformY' />
+                    <input class="form-range" type='range' min='1' :min='-svgInstance.canvas.height'
+                      :max='svgInstance.canvas.height' step="1" v-model.number='svgInstance.transformY' />
                   </div>
                 </div>
                 <hr>
-    
+
                 <div class="row">
                   <div class="col-12">
                     <div class="form-check">
@@ -151,7 +153,7 @@
                   </div>
                 </div>
                 <hr>
-    
+
                 <div class="row">
                   <label class="col-6 col-form-label" for="">Drawing type:</label>
                   <div class="col-6 d-flex align-items-center">
@@ -159,8 +161,8 @@
                       Line
                     </label>
                     <div class="form-check form-switch justify-content-between m-0 ms-2">
-                      <input class="form-check-input" type="checkbox" role="switch"
-                        v-model="options.dots.active" id="flexCheckDefault">
+                      <input class="form-check-input" type="checkbox" role="switch" v-model="options.dots.active"
+                        id="flexCheckDefault">
                     </div>
                     <label class="form-check-label" for="flexCheckDefault">
                       Dots
@@ -168,18 +170,17 @@
                   </div>
                 </div>
                 <hr>
-    
+
                 <div v-if="options.dots.active" class="row">
                   <label class="col-8 col-form-label" for="">Dot radius:</label>
                   <div class="col-4">
                     <input class='form-control' type='text' v-model='options.dots.radius' />
                   </div>
                   <div class="col-12">
-                    <input class="form-range" type='range' min='1' max='25' step="1"
-                      v-model='options.dots.radius' />
+                    <input class="form-range" type='range' min='1' max='25' step="1" v-model='options.dots.radius' />
                   </div>
                 </div>
-    
+
                 <div class="row">
                   <label class="col-8 col-form-label" for="">Color:</label>
                   <div class="col-4">
@@ -201,14 +202,28 @@
                     </div>
                   </div>
                 </div>
-    
+
               </fieldset>
-    
+
+            </div>
+
+            <!-- Svg input -->
+            <div class='step-3' :class='step === 3 ? "d-block" : "d-none"'>
+              <h2>Coordinates</h2>
+              <hr>
+              <label for="file-upload" class="custom-file-upload">
+                JSON
+              </label>
+
+              <hr>
+              <div v-if="svg" class="form-floating">
+                <textarea id="coord-content" v-model="svgInstance.pathCoordinates" class="form-control" style="height: 200px">{{svg}}</textarea>
+              </div>
             </div>
           </div>
         </div>
       </div>
-      <div id='canvasHolder' class='col-7 h-100'></div>
+      <div id='canvasHolder' class='col-12 h-100'></div>
     </div>
 
     <div id="api-modal" class="modal fade" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -244,14 +259,16 @@
                     <h6 class="card-title">{{sample.attribution.replace(/^(.{15})(.*)/, '$1...')}}</h6>
                     <p class="card-text">{{sample.creator.name}}</p>
                     <div class="d-grid gap-2">
-                      <button :disabled="getApi.loading || sample.id == getApi.selected" class="btn btn-primary" @click="select(sample.id)">Select</button>
+                      <button :disabled="getApi.loading || sample.id == getApi.selected" class="btn btn-primary"
+                        @click="select(sample.id)">Select</button>
                     </div>
                   </div>
                 </div>
               </div>
               <hr>
               <div class="d-flex justify-content-center">
-                <button :disabled="getApi.loading" @click="searchFromCommonsApi(true)" class="btn btn-primary">Load more...</button>
+                <button :disabled="getApi.loading" @click="searchFromCommonsApi(true)" class="btn btn-primary">Load
+                  more...</button>
               </div>
             </div>
           </div>
@@ -263,24 +280,25 @@
     </div>
 
     <div class="toast-container position-fixed d-flex justify-content-end bottom-0 p-4 w-100">
-      <div id="error-toast" class="toast align-items-center text-bg-danger" role="alert" aria-live="assertive" aria-atomic="true">
+      <div id="error-toast" class="toast align-items-center text-bg-danger" role="alert" aria-live="assertive"
+        aria-atomic="true">
         <div class="d-flex">
           <div class="toast-body">
-           {{error}}
+            {{error}}
           </div>
-          <button type="button" class="btn-close btn-close-white me-2 me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-close-white me-2 me-2 m-auto" data-bs-dismiss="toast"
+            aria-label="Close"></button>
         </div>
       </div>
     </div>
 
-    
+
   </div>
 </body>
 <script src="/main.js"></script>
 <script src="/api.js"></script>
-<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-  integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+<script src="/vue.global.js"></script>
+<script src="/bootstrap.bundle.min.js"></script>
 <script src="/helpers/pathologist.js"></script>
 <script src="/libraries/p5.min.js"></script>
 <script src="/libraries/p5.sound.min.js"></script>
@@ -307,8 +325,12 @@
       const svgInstance = ref(sketchData)
       const modal = ref(null)
       const page = ref(0)
+      const controlPanel = ref({
+        width: 'auto',
+        height: 'auto'
+      })
 
-      return { step, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal, page, options }
+      return { step, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal, page, options, controlPanel }
     },
 
     computed: {
@@ -321,10 +343,10 @@
       svg(newVal, oldValue) {
         sketch.coordinates(newVal);
         //scaling and centerize
-        // sketch.data.scale = sketch.optimize.scale(sketch.data.canvas,sketch.data.svg)
-        // const c = sketch.optimize.center(sketch.data.canvas, sketch.data.svg)
-        // sketch.data.transformX = c.x
-        // sketch.data.transformY = c.y
+        sketch.data.scale = sketch.optimize.scale(sketch.data.canvas,sketch.data.svg)
+        const c = sketch.optimize.center(sketch.data.canvas, sketch.data.svg)
+        sketch.data.transformX = c.x
+        sketch.data.transformY = c.y
         sketch.calculation().mount()
       },
 
@@ -343,7 +365,7 @@
       },
 
       error(v) {
-        if(!v) {
+        if (!v) {
           this.toast.hide()
         } else {
           this.toast.show()
@@ -354,6 +376,10 @@
     mounted() {
       this.modal = new bootstrap.Modal(document.getElementById("api-modal"))
       this.toast = bootstrap.Toast.getOrCreateInstance(document.getElementById('error-toast'))
+      this.controlPanel.width = this.$refs.cpanel.offsetWidth + 'px';
+      this.controlPanel.height = this.$refs.cpanel.offsetHeight + 'px';
+      console.log(this.controlPanel)
+      sketch.mount()
     },
 
     methods: {
@@ -402,7 +428,7 @@
 
           const response = await request.json()
 
-          if(!request.ok) throw new Error(response.message);
+          if (!request.ok) throw new Error(response.message);
 
           if (more)
             this.getApi.samples.push(...response.icons)
@@ -431,7 +457,7 @@
 
           const response = await request.json()
 
-          if(!request.ok) throw new Error(response.message);
+          if (!request.ok) throw new Error(response.message);
 
           const getApiSvg = await fetch(response.icon.icon_url)
 
@@ -459,7 +485,7 @@
 
           const response = await request.json()
 
-          if(!request.ok) throw new Error(response.message);
+          if (!request.ok) throw new Error(response.message);
 
           if (more)
             this.getApi.samples.push(...response)

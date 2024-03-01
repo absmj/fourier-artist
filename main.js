@@ -47,7 +47,7 @@ const sketchData = {
     show: {
       axis: false,
       coordinate: false,
-      grid: false
+      grid: true
     },
     dots: {
       radius: 1,

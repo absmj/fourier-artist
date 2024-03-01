@@ -52,9 +52,6 @@ let sketch = {
     try {
       index = 0;
       this.data.finished = false;
-      const canvasEl = document.getElementById("canvasHolder")
-      this.data.canvas.width = canvasEl.offsetWidth
-      this.data.canvas.height = canvasEl.offsetHeight
       this.data.pathCoordinates = new Array();
       const svgContainer = document.querySelector('#svg-content');
       const svgContainerOriginal = document.querySelector('#svg-content-org');
@@ -121,12 +118,15 @@ let sketch = {
       p5.grid = () => {
         p5.push();
         p5.drawingContext.setLineDash([5, 5])
-        for (let w = 0; w < this.data.canvas.width; w += this.data.canvas.width / 10) {
-          for (let h = 0; h < this.data.canvas.height; h += this.data.canvas.height / 10) {
+
+        const squareGridSize = Math.max(this.data.canvas.width, this.data.canvas.height)
+
+        for (let w = 0; w < squareGridSize; w += squareGridSize / 10) {
+          for (let h = 0; h < squareGridSize; h += squareGridSize / 10) {
             p5.stroke(0, 20);
             p5.strokeWeight(1);
-            p5.line(w, 0, w, this.data.canvas.height);
-            p5.line(0, h, this.data.canvas.width, h);
+            p5.line(w, 0, w, squareGridSize);
+            p5.line(0, h, squareGridSize, h);
           }
         }
         p5.pop();
@@ -150,9 +150,14 @@ let sketch = {
       }
 
       p5.setup = () => {
+        this.data.canvas.width = p5.windowWidth
+        this.data.canvas.height = p5.windowHeight
         p5.createCanvas(this.data.canvas.width, this.data.canvas.height);
 
-        p5.coordinate()
+        if(this.data.pathCoordinates.length > 0)
+          p5.coordinate()
+        else
+          p5.grid()
 
         // currentImage = this.data.p5.createGraphics(this.data.canvas.width, this.data.canvas.height)
       }
