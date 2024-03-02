@@ -5,7 +5,7 @@ html, body {
 }
 
 * {
-  --control-panel-width: auto
+  --control-panel-width: auto;
 }
 
 canvas {
@@ -334,19 +334,108 @@ input[type="file"] {
   /* height:  var(--c); */
   overflow: hidden;
   transition: all 0.567s ease-in-out;
-  opacity: .5;
+  opacity: .85;
 }
 
 .l-1 {
-  left: 1.15em
+  left: calc(-1 * var(--control-panel-width) + 85px);
+  opacity: initial;
 }
 
-.control-panel:hover {
-  opacity: 1;
+.l-2 {
+  left: 1.15em;
+  opacity: initial;
 }
 
-.control-panel > .row {
+@media (min-width: 968px) {
+  .control-panel:hover {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 968px) {
+  .control-panel {
+    padding: 2rem;
+    left: 0;
+  }
+  .l-1 {
+    left: calc(-100vw / 1.1);
+    /* opacity: 0; */
+  }
+  
+  .l-2 {
+    left: 0;
+    /* opacity: 1; */
+  }
+}
+
+
+#main-loading{
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  background-color: rgba(0, 0, 0, .30);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 30;
+}
+
+#options {
+  height: calc(100vh - 8em - 100px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#options > .row {
+  padding: 1rem;
+}
+
+
+#nav > .row {
+  position: relative;
   overflow: hidden;
   border-radius: 1.168em;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, .30);
+  height: calc(100vh - 8em);
+}
+
+.active-step-panel {
+  height: inherit;
+  overflow: hidden;
+}
+
+.toggle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  padding: 0!important;
+}
+
+.anim-fade-out {
+  animation: fade-out 1.567s ease-in-out 5s 1 forwards;
+}
+
+.anim-fade-in {
+  animation: fade-in 1.0567s ease-in-out 1 forwards;
+}
+
+@keyframes fade-out {
+  from {
+    opacity: inherit;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: inherit;
+  }
+  to {
+    opacity: 1;
+  }
 }

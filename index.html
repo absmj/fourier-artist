@@ -5,222 +5,341 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Sketch</title>
+  <title>Fourier Artist</title>
   <link rel="stylesheet" type="text/css" href="/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="style.css">
-
+  <meta name="description" content="Discover the art of Fourier transformations with Fourier Artist in p5.js. Redraw complex representations using sinusoidal waves, simplifying and reusing data for a captivating and unique artistic experience.">
+  <meta name="keywords" content="Fourier transformations, p5.js, art, creative coding, sinusoidal waves, data visualization">
+  <meta name="author" content="Abbas Majidov">
+  <link rel="icon" href="/static/examples/redcircle.png" type="image/png">
+  
 </head>
 
 <body>
   <div class="all" id="app">
+    <div id="main-loading" v-if="loading">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
     <div class="row justify-content-center align-items-center h-100 position-relative">
-      <div class="col-md-5 control-panel" ref="cpanel" :style="{'--control-panel-width': controlPanel.width}" :class="svg ? 'l-1' : ''">
+      <div class="col-12 p-3 d-md-none d-flex justify-content-between mobile-nav position-absolute top-0">
+        <div class="p-2" :class='step === 1 ? "selected-step": "non-selected-step"' @click='step = 1'>Import image</div>
+        <div class="p-2" :class='step === 2 ? "selected-step": "non-selected-step"' @click='step = 2'>Options</div>
+        <div class="p-2" :class='step === 3 ? "selected-step": "non-selected-step"' @click='step = 3'>Coordinates</div>
+      </div>
+      <div class="col-md-5 control-panel" ref="cpanel" :style="{'--control-panel-width': controlPanel.width}"
+        :class="svg ? (controlPanel.toggle ? 'l-2' : 'l-1') : ''" @transitionstart="svg ? loading = false : false" @transitionend="controlPanel.toggle === null && svg ? controlPanel.toggle = false : false">
         <div class="row">
           <!-- Navigation -->
-          <div class='nav-panel col-6 position-relative p-0 p-3'>
-            <div class='side-bar-text'>
-              <h1>Fourier artist</h1>
-              <p>Turn an SVG into XY coördinates.
-                <br /> Made by <a href='https://twitter.com/alizauf'>Abbas Majidov</a> @ <a
-                  href='https://www.spotify.com'>Spotify</a>
-              </p>
+          <div id="nav" :class="controlPanel.toggle !== null ? 'col-11' : 'col-12'">
+            <div class="row">
+              <div class='nav-panel d-none d-md-flex col-md-4 position-relative p-0 p-3 flex-column justify-content-between'>
+                <ol>
+                  <li :class='step === 1 ? "selected-step": "non-selected-step"' @click='step = 1'>
+                    Import image
+                  </li>
+                  <li :class='step === 2 ? "selected-step": "non-selected-step"' @click='step = 2'>
+                    Options
+                  </li>
+                  <li :class='step === 3 ? "selected-step": "non-selected-step"' @click='step = 3'>
+                    Get Coordinates
+                  </li>
+
+                </ol>
+
+                <div>
+                  <h4>Fourier artist</h4>
+                  <p class="text-muted">Redraw image, with fourier complex number.
+                    <br /><small><a href='https://linkedin.com/in/absmj'>Abbas Majidov</a> @ <a
+                      href='https://www.bankrespublika.com'>Bank Respublika</a></small>
+                  </p>
+                  <img src="/static/examples/p5js.svg" alt="This is p5.js project" class="img-fluid" style="width: 5em;">
+                  <hr>
+                  <p class="fw-bold" :class='step === 4 ? "selected-step": "non-selected-step"' @click='step = 4'>
+                    why this exists, thanks & credits
+                  </p>
+                </div>
+              </div>
+
+              <div class="active-step-panel col-12 col-md-8 p-0">
+                <!-- Svg input -->
+                <div class='step-1 p-3' :class='step === 1 ? "d-block" : "d-none"'>
+                  <h2>Import image</h2>
+                  <hr>
+                  <div v-show="svg">
+                    <div class="d-flex justify-content-center align-items-center d-none" id="svg-content"></div>
+                    <div class="d-flex justify-content-center align-items-center" id="svg-content-org"></div>
+                    <hr>
+                  </div>
+                  <label for="file-upload" class="custom-file-upload">
+                    Select File
+                  </label>
+
+                  <input id="file-upload" type="file" @change="handleFile" />
+                  <hr>
+                  <p>Find more image at the <a data-bs-toggle="modal" @click="selectedApi=1"
+                      data-bs-target="#api-modal">Wikimedia Commons</a> or <a data-bs-toggle="modal"
+                      @click="selectedApi=0" data-bs-target="#api-modal">Noun
+                      Project [only svg]</a>
+                  </p>
+                  <div :style='{stroke: error ? "#EB1E32" : "#F037A5"}' ref="svgHolder" id='svg-holder'></div>
+                  <hr>
+
+                  <div class="form-floating">
+                    <small for="floatingTextarea2">or paste the SVG text file below and try making changes</small>
+                    <textarea id="coord-content" v-model="svg" class="form-control"
+                      style="height: 200px">{{svg}}</textarea>
+                  </div>
+                  <hr>
+                  <h5>...or try an example</h5>
+                  <hr>
+                  <div class='example-container'>
+                    <div class='example-container'>
+  
+                      <button v-for="(example, key) in examples" :key="key" @click="getExample(example)" class='dot-button' :class="example.name == exampleName ? 'selected-dot-button' : ''"><img class="img-fluid" style="height: 3em;" :src="example.url" :alt="example.name"></button>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class='step-2' :class="step==2?'d-block':'d-none'">
+                  <h2 class="p-3 m-0" x>Options</h2>
+                  <hr>
+                  <fieldset id="options" :disabled="!svg">
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">Number of points:</label>
+                      <div class="col-4">
+                        <input class='form-control' type='text' v-model='svgInstance.waveCount' />
+                      </div>
+                      <div class="col-12">
+                        <input class="form-range" type='range' min='1' max='5000' v-model='svgInstance.waveCount' />
+                      </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">Scale:</label>
+                      <div class="col-4">
+                        <input class='form-control' type='text' v-model='svgInstance.scale' />
+                      </div>
+                      <div class="col-12">
+                        <input class="form-range" type='range' min='0.1' max='10' step="0.1"
+                          v-model.number='svgInstance.scale' />
+                      </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">TranslateX:</label>
+                      <div class="col-4">
+                        <input class='form-control' type='text' v-model.number='svgInstance.transformX' />
+                      </div>
+                      <div class="col-12">
+                        <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width'
+                          :min='-svgInstance.canvas.width' step="1" v-model.number='svgInstance.transformX' />
+                      </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">TranslateY:</label>
+                      <div class="col-4">
+                        <input class='form-control' type='text' v-model.number='svgInstance.transformY' />
+                      </div>
+                      <div class="col-12">
+                        <input class="form-range" type='range' min='1' :min='-svgInstance.canvas.height'
+                          :max='svgInstance.canvas.height' step="1" v-model.number='svgInstance.transformY' />
+                      </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="form-check">
+                          <input class='form-check-input' type="checkbox" v-model='svgInstance.seperate' />
+                          <label class="form-check-label" for="">Seperate</label>
+                        </div>
+                        <div class="form-check">
+                          <input class='form-check-input' type="checkbox" v-model='options.show.grid' />
+                          <label class="form-check-label" for="">Grid</label>
+                        </div>
+                        <div class="form-check">
+                          <input class='form-check-input' type="checkbox" v-model='options.show.axis' />
+                          <label class="form-check-label" for="">Coordinate axis</label>
+                        </div>
+                        <div class="form-check">
+                          <input class='form-check-input' type="checkbox" v-model='options.show.coordinate' />
+                          <label class="form-check-label" for="">Show coordinates</label>
+                        </div>
+                      </div>
+                    </div>
+                    <hr>
+
+                    <div class="row">
+                      <label class="col-6 col-form-label" for="">Drawing type:</label>
+                      <div class="col-6 d-flex align-items-center">
+                        <label class="form-check-label" for="flexCheckDefault">
+                          Line
+                        </label>
+                        <div class="form-check form-switch justify-content-between m-0 ms-2">
+                          <input class="form-check-input" type="checkbox" role="switch" v-model="options.dots.active"
+                            id="flexCheckDefault">
+                        </div>
+                        <label class="form-check-label" for="flexCheckDefault">
+                          Dots
+                        </label>
+                      </div>
+                    </div>
+                    <hr>
+
+                    <div v-if="options.dots.active" class="row">
+                      <label class="col-8 col-form-label" for="">Dot radius:</label>
+                      <div class="col-12">
+                        <input class="form-range" type='range' min='1' max='25' step="1"
+                          v-model='options.dots.radius' />
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">Background color:</label>
+                      <div class="col-4">
+                        <input :value="options.background" class='color-picker' type="color"
+                          @change='options.background = $event.target.value' />
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">Color:</label>
+                      <div class="col-4">
+                        <input :value="options.color" class='color-picker' type="color"
+                          @change='options.color = $event.target.value' />
+                      </div>
+                      <div class="col-12">
+                        <div class="d-grid gap-2">
+                          <a @click='options.color="random"' class="btn btn-primary fw-bold">
+                            <span :style="{color:confetti()}">C</span>
+                            <span :style="{color:confetti()}">o</span>
+                            <span :style="{color:confetti()}">n</span>
+                            <span :style="{color:confetti()}">f</span>
+                            <span :style="{color:confetti()}">e</span>
+                            <span :style="{color:confetti()}">t</span>
+                            <span :style="{color:confetti()}">t</span>
+                            <span :style="{color:confetti()}">i</span>
+                            <span :style="{color:confetti()}">!</span>
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+
+                    <hr>
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">Ellipse opacity:</label>
+                      <div class="col-12">
+                        <input class="form-range" type='range' min='0'
+                          max='100' step="1" v-model.number='options.ellipseStroke.opacity' />
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">Line opacity:</label>
+                      <div class="col-12">
+                        <input class="form-range" type='range' min='0'
+                          max='100' step="1" v-model.number='options.lineStroke.opacity' />
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">Ellipse color:</label>
+                      <div class="col-4">
+                        <input :value="options.ellipseStroke.color" class='color-picker' type="color"
+                          @change='options.ellipseStroke.color = $event.target.value' />
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                      <label class="col-8 col-form-label" for="">Line color:</label>
+                      <div class="col-4">
+                        <input :value="options.lineStroke.color" class='color-picker' type="color"
+                          @change='options.lineStroke.color = $event.target.value' />
+                      </div>
+                    </div>
+                  </fieldset>
+
+                </div>
+
+                <!-- Svg input -->
+                <div class='step-3 p-3' :class='step === 3 && svg ? "d-block" : "d-none"'>
+                  <h2>Coordinates</h2>
+                  <hr>
+                  <label v-if="svg" @click="downloadJSON" for="file-download" class="custom-file-upload">
+                    JSON
+                  </label>
+
+                  <hr>
+                  <div v-if="svg" class="form-floating">
+                    <textarea readonly ref="coord-content" class="form-control"
+                      style="height: 500px">{{pathCoordinates}}</textarea>
+                  </div>
+                </div>
+
+                <div class="step-4 p-3" :class="step == 4 ? 'd-block' : 'd-none'">
+                  <div>
+                    <h4>Inspiration</h4>
+                    <figure>
+                      <blockquote class="blockquote">
+                        <p>Why is the square of "i" a negative number...</p>
+                      </blockquote>
+                      <figcaption class="blockquote-footer">
+                        In middle school mathematics, we are introduced to the number "i"; But why does this number
+                        differ from other numbers...
+                      </figcaption>
+                    </figure>
+                    <hr>
+                    <p>
+                      Starting with a simple question, I once again witnessed how fascinating and versatile mathematics
+                      is as a result of the investigation. Especially in the calculations involving coordinates, the
+                      application of this number leads to the creation of different representations and intricate
+                      fractals in urban settings.
+                    </p>
+
+                    <h4>Fourier Transformations</h4>
+                    <hr>
+                    <p>
+                      Here, representations are "redrawn" using Fourier transformations. Fourier transformations are
+                      applied to separate information into sinusoidal waves, simplifying and reusing the data. See: <a
+                        href="https://www.jezzamon.com/fourier/index.html">An Interactive Introduction to Fourier
+                        Transforms</a>
+                    </p>
+
+                    <hr>
+                    <h5>Thanks...</h5>
+
+                    <hr>
+                    <div>
+                      <p class="p-0 m-0">Typically, this is created by <a href='https://twitter.com/alizauf'>Aliza
+                          Aufrichtig</a> @ <a href='https://www.spotify.com'>Spotify</a>,</p>
+                      <p class="p-0 m-0"><a href='https://twitter.com/shiffman'>Daniel Shiffman</a> @ <a
+                          href='https://thecodingtrain.com'>Coding Train</a></p>
+                      <p class="p-0 m-0"><a href='https://twitter.com/jezzamonn'>Jez Swanson</a> @ <a
+                          href='https://www.jezzamon.com'>Google</a></p>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
             </div>
-            <ol>
-              <li :class='step === 1 ? "selected-step": "non-selected-step"' @click='step = 1'>
-                Import SVG
-              </li>
-              <li :class='step === 2 ? "selected-step": "non-selected-step"' @click='step = 2'>
-                Refine Dots
-              </li>
-              <li :class='step === 3 ? "selected-step": "non-selected-step"' @click='step = 3'>
-                Get Coördinates
-              </li>
-
-            </ol>
-
-            <ol class='credits-placer'>
-              <li class='credits' :class='step === 4 ? "selected-step": "non-selected-step"' @click='step = 4'>
-                why this exists, thanks & credits
-              </li>
-            </ol>
+          </div>
+          <div v-if="svg" :class="controlPanel.toggle !== null ? 'col-1' : ''">
+            <button type="button" @click="controlPanel.toggle ^= 1" class="btn btn-sm btn-dark toggle-btn">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                class="bi bi-filter-circle-fill" viewBox="0 0 16 16">
+                <path
+                  d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16M3.5 5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1 0-1M5 8.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m2 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 0 1h-1a.5.5 0 0 1-.5-.5" />
+              </svg>
+            </button>
           </div>
 
-          <div class="active-step-panel col-6 p-3">
-            <!-- Svg input -->
-            <div class='step-1' :class='step === 1 ? "d-block" : "d-none"'>
-              <h2>Import SVG</h2>
-              <hr>
-              <div v-show="svg">
-                <div class="d-flex justify-content-center align-items-center d-none" id="svg-content"></div>
-                <div class="d-flex justify-content-center align-items-center" id="svg-content-org"></div>
-                <hr>
-              </div>
-              <label for="file-upload" class="custom-file-upload">
-                Select File
-              </label>
-
-              <input id="file-upload" type="file" @change="handleFile" />
-              <div :style='{stroke: error ? "#EB1E32" : "#F037A5"}' ref="svgHolder" id='svg-holder'></div>
-
-              <hr>
-              <div class="form-floating">
-                <textarea id="coord-content" v-model="svg" class="form-control" style="height: 200px">{{svg}}</textarea>
-                <label for="floatingTextarea2">or paste SVG text file below</label>
-              </div>
-              <hr>
-              <h3>...or try an example</h3>
-              <div class='example-container'>
-                <!-- {{#each Object.keys(examples) as example }}
-                <button on:click='setNewSVG(examples[example], true, example)' class='dot-button {{selectedExample === example ? "selected-dot-button" : ""}}'>{{{examples[example]}}}</button>
-                 {{/each}} -->
-              </div>
-              <hr>
-              <p>Find more SVGs at the <a data-bs-toggle="modal" @click="selectedApi=0" data-bs-target="#api-modal">Noun
-                  Project</a>
-                or <a data-bs-toggle="modal" @click="selectedApi=1" data-bs-target="#api-modal">Wikimedia Commons</a>
-              </p>
-            </div>
-
-            <div class='step-2' :class="step==2?'d-block':'d-none'">
-              <h2>Refine Dots</h2>
-
-              <fieldset :disabled="!svg">
-                <div class="row">
-                  <label class="col-8 col-form-label" for="">Number of points:</label>
-                  <div class="col-4">
-                    <input class='form-control' type='text' v-model='svgInstance.waveCount' />
-                  </div>
-                  <div class="col-12">
-                    <input class="form-range" type='range' min='1' max='5000' v-model='svgInstance.waveCount' />
-                  </div>
-                </div>
-                <hr>
-
-                <div class="row">
-                  <label class="col-8 col-form-label" for="">Scale:</label>
-                  <div class="col-4">
-                    <input class='form-control' type='text' v-model='svgInstance.scale' />
-                  </div>
-                  <div class="col-12">
-                    <input class="form-range" type='range' min='0.1' max='10' step="0.1"
-                      v-model.number='svgInstance.scale' />
-                  </div>
-                </div>
-                <hr>
-
-                <div class="row">
-                  <label class="col-8 col-form-label" for="">TranslateX:</label>
-                  <div class="col-4">
-                    <input class='form-control' type='text' v-model.number='svgInstance.transformX' />
-                  </div>
-                  <div class="col-12">
-                    <input class="form-range" type='range' min='1' :max='svgInstance.canvas.width'
-                      :min='-svgInstance.canvas.width' step="1" v-model.number='svgInstance.transformX' />
-                  </div>
-                </div>
-                <hr>
-
-                <div class="row">
-                  <label class="col-8 col-form-label" for="">TranslateY:</label>
-                  <div class="col-4">
-                    <input class='form-control' type='text' v-model.number='svgInstance.transformY' />
-                  </div>
-                  <div class="col-12">
-                    <input class="form-range" type='range' min='1' :min='-svgInstance.canvas.height'
-                      :max='svgInstance.canvas.height' step="1" v-model.number='svgInstance.transformY' />
-                  </div>
-                </div>
-                <hr>
-
-                <div class="row">
-                  <div class="col-12">
-                    <div class="form-check">
-                      <input class='form-check-input' type="checkbox" v-model='svgInstance.seperate' />
-                      <label class="form-check-label" for="">Seperate</label>
-                    </div>
-                    <div class="form-check">
-                      <input class='form-check-input' type="checkbox" v-model='options.show.grid' />
-                      <label class="form-check-label" for="">Grid</label>
-                    </div>
-                    <div class="form-check">
-                      <input class='form-check-input' type="checkbox" v-model='options.show.axis' />
-                      <label class="form-check-label" for="">Coordinate axis</label>
-                    </div>
-                    <div class="form-check">
-                      <input class='form-check-input' type="checkbox" v-model='options.show.coordinate' />
-                      <label class="form-check-label" for="">Show coordinates</label>
-                    </div>
-                  </div>
-                </div>
-                <hr>
-
-                <div class="row">
-                  <label class="col-6 col-form-label" for="">Drawing type:</label>
-                  <div class="col-6 d-flex align-items-center">
-                    <label class="form-check-label" for="flexCheckDefault">
-                      Line
-                    </label>
-                    <div class="form-check form-switch justify-content-between m-0 ms-2">
-                      <input class="form-check-input" type="checkbox" role="switch" v-model="options.dots.active"
-                        id="flexCheckDefault">
-                    </div>
-                    <label class="form-check-label" for="flexCheckDefault">
-                      Dots
-                    </label>
-                  </div>
-                </div>
-                <hr>
-
-                <div v-if="options.dots.active" class="row">
-                  <label class="col-8 col-form-label" for="">Dot radius:</label>
-                  <div class="col-4">
-                    <input class='form-control' type='text' v-model='options.dots.radius' />
-                  </div>
-                  <div class="col-12">
-                    <input class="form-range" type='range' min='1' max='25' step="1" v-model='options.dots.radius' />
-                  </div>
-                </div>
-
-                <div class="row">
-                  <label class="col-8 col-form-label" for="">Color:</label>
-                  <div class="col-4">
-                    <input class='color-picker' type="color" @change='options.color = $event.target.value' />
-                  </div>
-                  <div class="col-12">
-                    <div class="d-grid gap-2">
-                      <a @click='options.color="random"' class="btn btn-primary fw-bold">
-                        <span :style="{color:confetti()}">C</span>
-                        <span :style="{color:confetti()}">o</span>
-                        <span :style="{color:confetti()}">n</span>
-                        <span :style="{color:confetti()}">f</span>
-                        <span :style="{color:confetti()}">e</span>
-                        <span :style="{color:confetti()}">t</span>
-                        <span :style="{color:confetti()}">t</span>
-                        <span :style="{color:confetti()}">i</span>
-                        <span :style="{color:confetti()}">!</span>
-                      </a>
-                    </div>
-                  </div>
-                </div>
-
-              </fieldset>
-
-            </div>
-
-            <!-- Svg input -->
-            <div class='step-3' :class='step === 3 ? "d-block" : "d-none"'>
-              <h2>Coordinates</h2>
-              <hr>
-              <label for="file-upload" class="custom-file-upload">
-                JSON
-              </label>
-
-              <hr>
-              <div v-if="svg" class="form-floating">
-                <textarea id="coord-content" v-model="svgInstance.pathCoordinates" class="form-control" style="height: 200px">{{svg}}</textarea>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
       <div id='canvasHolder' class='col-12 h-100'></div>
@@ -245,6 +364,17 @@
                 </div>
               </div>
             </div>
+
+            <div class="row">
+              <div class="col-12">
+                <div class="form-check mt-2">
+                  <input :disabled="!getApi.supportPng" id="only-svg" class='form-check-input' type="checkbox" v-model='getApi.onlySvg' />
+                  <label class="form-check-label" for="only-svg">Only SVG images</label>
+                  <br>
+                  <small>For the best results, we recommend trying SVG files.</small>
+                </div>
+              </div>
+            </div>
             <hr>
             <div :class="getApi.samples.length > 0 ? 'position-absolute' : ''" id="loading" v-if="getApi.loading">
               <div class="spinner-border text-primary" role="status">
@@ -260,7 +390,7 @@
                     <p class="card-text">{{sample.creator.name}}</p>
                     <div class="d-grid gap-2">
                       <button :disabled="getApi.loading || sample.id == getApi.selected" class="btn btn-primary"
-                        @click="select(sample.id)">Select</button>
+                        @click="select(sample.id, sample.creator.name)">Select</button>
                     </div>
                   </div>
                 </div>
@@ -295,19 +425,21 @@
 
   </div>
 </body>
+<script src="/helpers/util.js"></script>
 <script src="/main.js"></script>
 <script src="/api.js"></script>
+<script src="/static/examples/index.js"></script>
 <script src="/vue.global.js"></script>
 <script src="/bootstrap.bundle.min.js"></script>
 <script src="/helpers/pathologist.js"></script>
 <script src="/libraries/p5.min.js"></script>
-<script src="/libraries/p5.sound.min.js"></script>
 <script src="/helpers/d3-array.js"></script>
 <script src="/helpers/ct.js"></script>
 <script src="/helpers/complex.js"></script>
-<script src="/helpers/util.js"></script>
-<script src="helpers/coordinates.js"></script>
-<script src="sketch.js"></script>
+<script src="/helpers/coordinates.js"></script>
+<script src="/sketch.js"></script>
+<script defer src="/libraries/imagetracer.js"></script>
+
 
 <script>
   const { createApp, ref } = Vue;
@@ -315,6 +447,7 @@
   const app = createApp({
     setup() {
       const api = ref(apiList)
+      const loading = ref(false)
       const selectedApi = ref(0)
       const toast = ref(null)
       const step = ref(1)
@@ -325,17 +458,25 @@
       const svgInstance = ref(sketchData)
       const modal = ref(null)
       const page = ref(0)
+      const exampleName =ref(null)
       const controlPanel = ref({
         width: 'auto',
-        height: 'auto'
+        height: 'auto',
+        toggle: null
       })
 
-      return { step, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal, page, options, controlPanel }
+      return { loading, step, examples, exampleName, svg, coordinates, error, svgTextError, svgInstance, api, selectedApi, toast, modal, page, options, controlPanel }
     },
 
     computed: {
       getApi() {
         return this.api[this.selectedApi]
+      },
+
+      pathCoordinates() {
+        return !this.svgInstance.seperate ?
+          this.svgInstance.pathCoordinates[0].map(k => ({ x: k[0], y: k[1] })) :
+          this.svgInstance.pathCoordinates.map(i => i.map(k => ({ x: k[0], y: k[1] })))
       }
     },
 
@@ -343,11 +484,12 @@
       svg(newVal, oldValue) {
         sketch.coordinates(newVal);
         //scaling and centerize
-        sketch.data.scale = sketch.optimize.scale(sketch.data.canvas,sketch.data.svg)
+        sketch.data.scale = sketch.optimize.scale(sketch.data.canvas, sketch.data.svg)
         const c = sketch.optimize.center(sketch.data.canvas, sketch.data.svg)
         sketch.data.transformX = c.x
         sketch.data.transformY = c.y
         sketch.calculation().mount()
+        this.controlPanel.toggle = false
       },
 
       svgInstance: {
@@ -370,6 +512,10 @@
         } else {
           this.toast.show()
         }
+      },
+
+      'sketch.loading': function() {
+        alert(1)
       }
     },
 
@@ -378,7 +524,6 @@
       this.toast = bootstrap.Toast.getOrCreateInstance(document.getElementById('error-toast'))
       this.controlPanel.width = this.$refs.cpanel.offsetWidth + 'px';
       this.controlPanel.height = this.$refs.cpanel.offsetHeight + 'px';
-      console.log(this.controlPanel)
       sketch.mount()
     },
 
@@ -386,9 +531,17 @@
       handleFile(e) {
         try {
           const reader = new FileReader()
-          reader.onload = e => {
-            if (e.target.result) {
-              this.svg = e.target.result
+          reader.onload = data => {
+
+            if (data) {
+              if (e.target.files[0].type == 'image/png') {
+                ImageTracer.imageToSVG(data.target.result, (svgString) => {
+                  this.svg = svgString
+                }, { scale: 10 });
+              } else {
+                this.svg = data.target.result;
+              }
+
             } else throw new Error("File content is empty or isn't readable")
           }
 
@@ -396,7 +549,7 @@
             throw new Error(e)
           }
 
-          reader.readAsText(e.target.files[0])
+          reader[e.target.files[0].type == 'image/png' ? 'readAsDataURL' : 'readAsText'](e.target.files[0])
 
         } catch (e) {
           this.error = e.message
@@ -423,7 +576,7 @@
           this.getApi.loading = true;
           const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search`, {
             method: 'POST',
-            body: JSON.stringify({ query: this.getApi.query })
+            body: JSON.stringify({ query: this.getApi.buildQuery })
           })
 
           const response = await request.json()
@@ -480,7 +633,7 @@
           this.getApi.loading = true
           const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search&page=${this.page}`, {
             method: 'POST',
-            body: JSON.stringify({ query: this.getApi.query })
+            body: JSON.stringify({ query: this.getApi.buildQuery })
           })
 
           const response = await request.json()
@@ -502,7 +655,7 @@
       },
 
 
-      async selectFromCommonsApi(url) {
+      async selectFromCommonsApi(url, type) {
         try {
           this.error = null
           this.getApi.loading = true;
@@ -510,8 +663,16 @@
           console.log(url)
           const getApiSvg = await fetch(url)
 
-          const svgData = await getApiSvg.text()
-          this.svg = svgData
+          if(!/svg/.test(type)) {
+            const imageData = await getApiSvg.blob()
+            ImageTracer.imageToSVG(URL.createObjectURL(imageData), (svgString) => {
+                  this.svg = svgString
+                }, { scale: 10 });
+          } else {
+            const svg = await getImage.text()
+            this.svg = svg
+          }
+
           this.modal.hide()
 
 
@@ -522,8 +683,44 @@
         }
       },
 
+      async getExample(example) {
+        try {
+          this.loading = true;
+          this.error = null;
+          this.exampleName = example.name
+          example.selected = true;
+          const getImage = await fetch(example.url)
+
+          if(/image/.test(example.type)) {
+            const imageData = await getImage.blob()
+            ImageTracer.imageToSVG(URL.createObjectURL(imageData), (svgString) => {
+                  this.svg = svgString
+                }, { scale: 10 });
+          } else {
+            // console.log(1)
+            const svg = await getImage.text()
+            this.svg = svg
+          }
+
+        } catch (e) {
+          this.error = e.message ?? e
+        } finally {
+          // this.loading = false
+        }
+      },
+
       confetti() {
         return `rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`;
+      },
+
+      downloadJSON() {
+        const blob = new Blob([this.$refs['coord-content'].value], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'coordinates.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
     },
   })

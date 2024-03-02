@@ -25,7 +25,7 @@ const sketchData = {
         return this.width * this.height
       }
     },
-    waveCount: 2000,
+    waveCount: 3500,
     scale: 1,
     transformX: 0,
     transformY: 0,
@@ -42,25 +42,31 @@ const sketchData = {
   }
 
   const options = {
-    background: 255,
-    color: 0,
+    background: '#000000',
+    color: '#ffffff',
     show: {
       axis: false,
       coordinate: false,
-      grid: true
+      grid: false
     },
     dots: {
-      radius: 1,
+      radius: 2,
       active: true,
       scale: 1,
       opacity: 100
     },
     lineStroke: {
       opacity: 20,
-      color: 0
+      color: '#ffffff',
+      get getColor() {
+        return hexToRGB(this.color, this.opacity / 100)
+      } 
     },
     ellipseStroke: {
       opacity: 20,
-      color: 0
-    }
+      color: '#ffffff',
+      get getColor() {
+        return hexToRGB(this.color, this.opacity / 100)
+      } 
+    },
   }

@@ -3,11 +3,16 @@ let index = 0;
 let sketch = {
   data: sketchData,
   options,
-
+  loading: false,
   get color() {
     return this.options.color == 'random' ?
       this.data.p5.color(`rgb(${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)}, ${Math.round(Math.random() * 255)})`)
       : this.data.p5.color(this.options.color)
+  },
+
+
+  get bgColor() {
+    return this.data.p5.color(this.options.background)
   },
 
   optimize: {
@@ -73,8 +78,8 @@ let sketch = {
 
       svgContainer.innerHTML = this.data.svg.pathologize
       this.data.svg.el = document.querySelector('#svg-content-org > svg')
-      this.data.svg.el.setAttribute('width', '200')
-      this.data.svg.el.setAttribute('height', '200')
+      this.data.svg.el.setAttribute('width', '100')
+      this.data.svg.el.setAttribute('height', '100')
       return this;
     } catch (e) {
       console.error(e)
@@ -104,7 +109,7 @@ let sketch = {
         for (let i = 0; i < this.data.pathCoordinates[index].length; i += skip) {
           const coord = this.data.pathCoordinates[index][i]
           const c = new Complex(coord[0], coord[1]);
-          c.color = this.color
+          // c.color = this.color
           this.data.x.push(c);
         }
         // currentImage = this.data.images[index]
@@ -123,7 +128,7 @@ let sketch = {
 
         for (let w = 0; w < squareGridSize; w += squareGridSize / 10) {
           for (let h = 0; h < squareGridSize; h += squareGridSize / 10) {
-            p5.stroke(0, 20);
+            p5.stroke(192, 75);
             p5.strokeWeight(1);
             p5.line(w, 0, w, squareGridSize);
             p5.line(0, h, squareGridSize, h);
@@ -146,6 +151,7 @@ let sketch = {
       }
 
       p5.preload = () => {
+        this.loading = false
         this.data.p5 = p5
       }
 
@@ -153,20 +159,19 @@ let sketch = {
         this.data.canvas.width = p5.windowWidth
         this.data.canvas.height = p5.windowHeight
         p5.createCanvas(this.data.canvas.width, this.data.canvas.height);
-
         if(this.data.pathCoordinates.length > 0)
           p5.coordinate()
         else
           p5.grid()
-
+        this.loading = false
         // currentImage = this.data.p5.createGraphics(this.data.canvas.width, this.data.canvas.height)
       }
 
       p5.draw = () => {
-        this.data.p5.background(this.options.background)
+        this.data.p5.background(this.bgColor)
         if (this.options.show.axis) p5.coordinateSystem();
         const { x, y } = this.fourier()
-        if (this.options.show.coordinate) {
+        if (this.options.show.coordinate && !this.finished) {
           p5.textSize(18)
           p5.textAlign(p5.RIGHT);
           p5.text(`x: ${x.toFixed(2)}\ny: ${y.toFixed(2)}`, this.data.canvas.width - 40, 36)
@@ -238,11 +243,11 @@ let sketch = {
       // }
 
       if (!this.data.finished) {
-        p5.stroke(fourier[i].color, this.options.ellipseStroke.opacity);
+        p5.stroke(p5.color(this.options.ellipseStroke.getColor));
         p5.noFill();
         p5.ellipse(prevx, prevy, radius * 2);
 
-        p5.stroke(fourier[i].color, this.options.lineStroke.opacity);
+        p5.stroke(p5.color(this.options.lineStroke.getColor));
         p5.line(prevx, prevy, x, y);
       } else {
         // this.data.p5.noLoop()

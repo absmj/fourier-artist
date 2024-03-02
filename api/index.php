@@ -68,7 +68,7 @@ function nounProject($url_ = '', array $params = null) {
 }
 
 function commons($page = 0, $limit = 40) {
-    $url = "https://commons.wikimedia.org/w/api.php?action=query&format=json&uselang=az&generator=search&gsrsearch=filetype%3Abitmap%7Cdrawing%20-fileres%3A0%20".$_POST['query']."%20svg&gsrlimit={$limit}&gsroffset=".($limit * $page)."&gsrinfo=totalhits%7Csuggestion&gsrprop=size%7Cwordcount%7Ctimestamp%7Csnippet&prop=info%7Cimageinfo%7Centityterms&inprop=url&gsrnamespace=6&iiprop=url%7Csize%7Cmime&iiurlheight=180&wbetterms=label";
+    $url = "https://commons.wikimedia.org/w/api.php?action=query&format=json&uselang=az&generator=search&gsrsearch=filetype%3Abitmap%7Cdrawing%20-fileres%3A0%20".$_POST['query']."&gsrlimit={$limit}&gsroffset=".($limit * $page)."&gsrinfo=totalhits%7Csuggestion&gsrprop=size%7Cwordcount%7Ctimestamp%7Csnippet&prop=info%7Cimageinfo%7Centityterms&inprop=url&gsrnamespace=6&iiprop=url%7Csize%7Cmime&iiurlheight=180&wbetterms=label";
 
     $data = [];
 
@@ -87,7 +87,7 @@ function commons($page = 0, $limit = 40) {
         if(!isset($page['imageinfo']) || !is_array($page['imageinfo'])) continue;
         
         foreach($page['imageinfo'] as $id => $image) {
-            if(!preg_match('/svg/', $image['mime'])) continue;
+            if(!preg_match('/svg|png|jpeg|jpg/', $image['mime'])) continue;
 
             array_push($data, [
                 'id' => $image['url'],

@@ -7,7 +7,13 @@ const apiList = [{
     selected: null,
     loading: false,
     search: "searchFromNounApi",
-    get: "selectFromNounApi"
+    get: "selectFromNounApi",
+    onlySvg: true,
+    supportPng: false,
+
+    get buildQuery() {
+        return this.query
+    }
 },
 
 {
@@ -21,5 +27,11 @@ const apiList = [{
     selected: null,
     loading: false,
     search: "searchFromCommonsApi",
-    get: "selectFromCommonsApi"
+    get: "selectFromCommonsApi",
+    onlySvg: true,
+    supportPng: true,
+
+    get buildQuery() {
+        return this.query + (this.onlySvg ? '.svg' : '')
+    }
 }]
