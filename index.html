@@ -574,7 +574,7 @@
         try {
           this.error = null;
           this.getApi.loading = true;
-          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search`, {
+          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=search`, {
             method: 'POST',
             body: JSON.stringify({ query: this.getApi.buildQuery })
           })
@@ -603,7 +603,7 @@
           this.getApi.loading = true;
           this.getApi.selected = id;
 
-          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=get`, {
+          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=get`, {
             method: 'POST',
             body: JSON.stringify({ id: this.getApi.selected })
           })
@@ -631,7 +631,7 @@
           this.page += 1
           this.error = null
           this.getApi.loading = true
-          const request = await fetch(`http://localhost/index.php?api=${this.getApi.name}&action=search&page=${this.page}`, {
+          const request = await fetch(`https://kale.eu5.org/index.php?api=${this.getApi.name}&action=search&page=${this.page}`, {
             method: 'POST',
             body: JSON.stringify({ query: this.getApi.buildQuery })
           })
