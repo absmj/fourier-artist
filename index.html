@@ -485,6 +485,7 @@
         sketch.coordinates(newVal);
         //scaling and centerize
         sketch.data.scale = sketch.optimize.scale(sketch.data.canvas, sketch.data.svg)
+        sketch.data.waveCount = sketch.optimize.numberOfDots(sketch.data.waveCount) || sketch.data.waveCount
         const c = sketch.optimize.center(sketch.data.canvas, sketch.data.svg)
         sketch.data.transformX = c.x
         sketch.data.transformY = c.y

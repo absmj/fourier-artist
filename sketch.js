@@ -31,6 +31,14 @@ let sketch = {
       const ws = (canvas.width / svg.width) * 0.6
       const hs = (canvas.height / svg.height) * 0.6
       return Math.min(ws, hs)
+    },
+
+    numberOfDots(dotCount) {
+      if(navigator.deviceMemory) return navigator.deviceMemory * 512;
+      else {
+        console.warn("Your browser doesn't support navigator.deviceMemory, so we can't define the optimal number of dots for you.")
+        return dotCount
+      }
     }
   },
 
