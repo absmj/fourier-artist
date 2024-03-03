@@ -1,6 +1,8 @@
 # Fourier Artist
 ## Inspiration
 
+![My name is i](/static/presentation-en.gif)
+
 > Why is the square of "i" a negative number...
 
 In middle school mathematics, we are introduced to the number "i"; But why does this number differ from other numbers...
