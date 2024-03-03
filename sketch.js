@@ -34,7 +34,7 @@ let sketch = {
     },
 
     numberOfDots(dotCount) {
-      if(navigator.deviceMemory) return navigator.deviceMemory * 512;
+      if(navigator.deviceMemory) return navigator.deviceMemory * (navigator.deviceMemory >= 1 ? 512 : 256);
       else {
         console.warn("Your browser doesn't support navigator.deviceMemory, so we can't define the optimal number of dots for you.")
         return dotCount
